@@ -7,12 +7,14 @@ from typing import Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 load_dotenv()
 
-from analyzer_service import analyze_storefront
+from analyzer_service import analyze_storefront, get_available_clients, load_client_kpis
 from database import get_analyses_by_store, get_analysis, init_db, save_analysis
 
 UPLOADS_DIR = os.getenv("UPLOADS_DIR", "./uploads")
@@ -38,6 +40,20 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# CORS middleware for mobile access
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Mount static files directory
+STATIC_DIR = Path(__file__).parent / "static"
+if STATIC_DIR.exists():
+    app.mount("/app", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
 
 
 class KPI(BaseModel):
@@ -77,23 +93,52 @@ async def root():
     }
 
 
-@app.post("/analyze", response_model=AnalysisResponse)
+@app.get("/clients")
+async def list_clients():
+    """
+    Lista los clientes disponibles con sus configuraciones de KPIs.
+    """
+    clients = get_available_clients()
+    result = []
+
+    for client_id in clients:
+        try:
+            config = load_client_kpis(client_id)
+            result.append({
+                "client_id": client_id,
+                "client_name": config.get("client_name", client_id),
+                "description": config.get("description", ""),
+                "kpis_count": len(config.get("kpis", [])),
+                "kpis": [kpi["name"] for kpi in config.get("kpis", [])]
+            })
+        except Exception:
+            continue
+
+    return result
+
+
+@app.post("/analyze")
 async def analyze_endpoint(
     image: UploadFile = File(..., description="Imagen del escaparate a analizar"),
-    store_id: str = Form(..., description="Identificador de la tienda")
+    store_id: str = Form(..., description="Identificador de la tienda"),
+    client_id: str = Form(..., description="Identificador del cliente (ej: cliente_a, cliente_b)")
 ):
     """
     Analiza una imagen de escaparate comparándola con las guidelines de referencia.
 
     - **image**: Imagen del escaparate (JPG, PNG, GIF, WebP)
     - **store_id**: Identificador único de la tienda
+    - **client_id**: Identificador del cliente (usa GET /clients para ver disponibles)
 
-    Retorna puntuaciones para 4 KPIs:
-    - Adecuación a requerimientos documentación
-    - Iluminación
-    - Marketing e imagen visual
-    - Limpieza
+    Retorna puntuaciones para los KPIs configurados del cliente.
     """
+    # Validate client exists
+    available_clients = get_available_clients()
+    if client_id not in available_clients:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cliente no encontrado: {client_id}. Clientes disponibles: {', '.join(available_clients)}"
+        )
     # Validate API key is configured
     if not os.getenv("ANTHROPIC_API_KEY"):
         raise HTTPException(
@@ -137,7 +182,8 @@ async def analyze_endpoint(
     try:
         result, tokens_input, tokens_output = await analyze_storefront(
             str(file_path),
-            store_id
+            store_id,
+            client_id
         )
     except Exception as e:
         # Clean up file on error
@@ -151,6 +197,7 @@ async def analyze_endpoint(
     try:
         await save_analysis(
             store_id=store_id,
+            client_id=client_id,
             image_filename=filename,
             result_json=result,
             tokens_input=tokens_input,

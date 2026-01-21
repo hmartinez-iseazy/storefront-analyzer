@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Storefront Analyzer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #16213e;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .capture-area {
+            background: #16213e;
+            border: 2px dashed #444;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 16px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .capture-area.has-image {
+            border-style: solid;
+            border-color: #4CAF50;
+        }
+
+        #preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .capture-btn {
+            background: #0f3460;
+            color: #fff;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .capture-btn:active {
+            background: #1a4a7a;
+        }
+
+        .capture-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 16px;
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .analyze-btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .analyze-btn:not(:disabled):active {
+            background: #45a049;
+        }
+
+        .results {
+            margin-top: 24px;
+            display: none;
+        }
+
+        .score-card {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .score-value {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 8px;
+        }
+
+        .verdict {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 12px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .verdict.perfect { background: #4CAF50; }
+        .verdict.acceptable { background: #8BC34A; }
+        .verdict.deficient { background: #FF9800; }
+        .verdict.critical { background: #f44336; }
+
+        .differences-section {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .difference-item {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid #666;
+        }
+
+        .difference-item.critical { border-left-color: #f44336; }
+        .difference-item.high { border-left-color: #FF9800; }
+        .difference-item.moderate { border-left-color: #FFC107; }
+        .difference-item.minor { border-left-color: #8BC34A; }
+
+        .diff-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .diff-category {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .diff-impact {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+
+        .diff-impact.critical { background: #f44336; }
+        .diff-impact.high { background: #FF9800; }
+        .diff-impact.moderate { background: #FFC107; color: #000; }
+        .diff-impact.minor { background: #8BC34A; }
+
+        .diff-description {
+            font-size: 0.85rem;
+            color: #ccc;
+            margin-bottom: 6px;
+        }
+
+        .diff-action {
+            font-size: 0.8rem;
+            color: #4CAF50;
+            font-style: italic;
+        }
+
+        .no-differences {
+            text-align: center;
+            color: #4CAF50;
+            padding: 20px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #333;
+            border-top-color: #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #f44336;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            color: #aaa;
+            border: 1px solid #444;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Storefront Analyzer</h1>
+
+        <div class="form-group">
+            <label for="clientSelect">Cliente</label>
+            <select id="clientSelect">
+                <option value="">Cargando clientes...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="storeId">ID de Tienda</label>
+            <input type="text" id="storeId" placeholder="ej: tienda_001">
+        </div>
+
+        <div class="capture-area" id="captureArea">
+            <img id="preview" alt="Vista previa">
+            <div id="capturePrompt">
+                <button class="capture-btn" id="cameraBtn">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 15.2a3.2 3.2 0 100-6.4 3.2 3.2 0 000 6.4z"/>
+                        <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                    </svg>
+                    Tomar Foto
+                </button>
+                <button class="capture-btn" id="galleryBtn">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                    </svg>
+                    Galería
+                </button>
+            </div>
+        </div>
+
+        <input type="file" id="fileInput" accept="image/*">
+
+        <button class="analyze-btn" id="analyzeBtn" disabled>Analizar Escaparate</button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analizando imagen...</p>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="results" id="results">
+            <div class="score-card">
+                <div class="score-value" id="scoreValue">--</div>
+                <div class="score-label">Puntuación de Similitud</div>
+                <div class="verdict" id="verdict">--</div>
+            </div>
+
+            <div class="differences-section">
+                <div class="section-title">Diferencias Detectadas</div>
+                <div id="differencesList"></div>
+            </div>
+
+            <button class="reset-btn" id="resetBtn">Nueva Foto</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        let selectedFile = null;
+
+        // DOM Elements
+        const clientSelect = document.getElementById('clientSelect');
+        const storeId = document.getElementById('storeId');
+        const captureArea = document.getElementById('captureArea');
+        const capturePrompt = document.getElementById('capturePrompt');
+        const preview = document.getElementById('preview');
+        const fileInput = document.getElementById('fileInput');
+        const cameraBtn = document.getElementById('cameraBtn');
+        const galleryBtn = document.getElementById('galleryBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const results = document.getElementById('results');
+        const scoreValue = document.getElementById('scoreValue');
+        const verdict = document.getElementById('verdict');
+        const differencesList = document.getElementById('differencesList');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Load clients on page load
+        async function loadClients() {
+            try {
+                const response = await fetch(`${API_BASE}/clients`);
+                const clients = await response.json();
+
+                clientSelect.innerHTML = '<option value="">Selecciona un cliente</option>';
+                clients.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.client_id;
+                    option.textContent = `${client.client_name} (${client.kpis_count} categorías)`;
+                    clientSelect.appendChild(option);
+                });
+            } catch (err) {
+                clientSelect.innerHTML = '<option value="">Error al cargar clientes</option>';
+            }
+        }
+
+        // Camera capture
+        cameraBtn.addEventListener('click', () => {
+            fileInput.setAttribute('capture', 'environment');
+            fileInput.click();
+        });
+
+        // Gallery selection
+        galleryBtn.addEventListener('click', () => {
+            fileInput.removeAttribute('capture');
+            fileInput.click();
+        });
+
+        // Handle file selection
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    capturePrompt.style.display = 'none';
+                    captureArea.classList.add('has-image');
+                    updateAnalyzeButton();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Update analyze button state
+        function updateAnalyzeButton() {
+            analyzeBtn.disabled = !(selectedFile && clientSelect.value && storeId.value.trim());
+        }
+
+        clientSelect.addEventListener('change', updateAnalyzeButton);
+        storeId.addEventListener('input', updateAnalyzeButton);
+
+        // Analyze image
+        analyzeBtn.addEventListener('click', async () => {
+            if (!selectedFile || !clientSelect.value || !storeId.value.trim()) return;
+
+            // Show loading
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            results.style.display = 'none';
+            analyzeBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('image', selectedFile);
+                formData.append('store_id', storeId.value.trim());
+                formData.append('client_id', clientSelect.value);
+
+                const response = await fetch(`${API_BASE}/analyze`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || 'Error en el análisis');
+                }
+
+                const result = await response.json();
+                displayResults(result);
+
+            } catch (err) {
+                error.textContent = err.message;
+                error.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                analyzeBtn.disabled = false;
+            }
+        });
+
+        // Display results
+        function displayResults(result) {
+            // Score
+            scoreValue.textContent = result.similarity_score;
+            scoreValue.style.color = getScoreColor(result.similarity_score);
+
+            // Verdict
+            verdict.textContent = getVerdictText(result.similarity_verdict);
+            verdict.className = `verdict ${result.similarity_verdict}`;
+
+            // Differences
+            differencesList.innerHTML = '';
+
+            if (!result.differences || result.differences.length === 0) {
+                differencesList.innerHTML = '<div class="no-differences">Sin diferencias detectadas</div>';
+            } else {
+                result.differences.forEach(diff => {
+                    const item = document.createElement('div');
+                    item.className = `difference-item ${diff.impact}`;
+                    item.innerHTML = `
+                        <div class="diff-header">
+                            <span class="diff-category">${diff.category}</span>
+                            <span class="diff-impact ${diff.impact}">${diff.impact}</span>
+                        </div>
+                        <div class="diff-description">${diff.description}</div>
+                        <div class="diff-action">${diff.action}</div>
+                    `;
+                    differencesList.appendChild(item);
+                });
+            }
+
+            results.style.display = 'block';
+        }
+
+        function getScoreColor(score) {
+            if (score >= 90) return '#4CAF50';
+            if (score >= 70) return '#8BC34A';
+            if (score >= 50) return '#FF9800';
+            return '#f44336';
+        }
+
+        function getVerdictText(verdict) {
+            const texts = {
+                'perfect': 'Perfecto',
+                'acceptable': 'Aceptable',
+                'deficient': 'Deficiente',
+                'critical': 'Crítico'
+            };
+            return texts[verdict] || verdict;
+        }
+
+        // Reset
+        resetBtn.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            preview.style.display = 'none';
+            capturePrompt.style.display = 'flex';
+            captureArea.classList.remove('has-image');
+            results.style.display = 'none';
+            error.style.display = 'none';
+            updateAnalyzeButton();
+        });
+
+        // Init
+        loadClients();
+    </script>
+</body>
+</html>

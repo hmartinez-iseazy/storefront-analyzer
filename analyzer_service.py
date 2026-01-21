@@ -15,163 +15,169 @@ logger = logging.getLogger(__name__)
 GUIDELINES_DIR = os.getenv("GUIDELINES_DIR", "./reference_guidelines")
 MODEL_NAME = os.getenv("MODEL_NAME", "claude-haiku-4-5-20251001")
 
-ANALYSIS_PROMPT = """You MUST respond with ONLY valid JSON. No additional text, explanations, or markdown before or after the JSON object.
 
-Eres un INSPECTOR DE ESCAPARATES retail. Ejecutas auditoría en DOS FASES: compliance documental Y calidad visual.
+def load_client_kpis(client_id: str) -> dict:
+    """Load KPI configuration for a specific client."""
+    kpis_path = Path(GUIDELINES_DIR) / client_id / "kpis.json"
 
-███████████████████████████████████████████████████████████████
-FASE 1: COMPLIANCE CON GUIDELINE (Contenido)
-███████████████████████████████████████████████████████████████
+    if not kpis_path.exists():
+        raise FileNotFoundError(f"No se encontró configuración de KPIs para cliente: {client_id}")
 
-Compara el CONTENIDO de la imagen enviada vs el PDF de referencia:
+    with open(kpis_path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-PASO 1.1 - Extraer requisitos del guideline:
-- Productos requeridos (tipo, cantidad, posición exacta)
-- Textos de carteles/señalética (texto EXACTO, ubicación)
-- Layout y disposición de elementos
-- Materiales POP/promocionales especificados
 
-PASO 1.2 - Verificar presencia en imagen:
-Para cada elemento del guideline:
-| Elemento | Requisito (Pág) | ¿Presente? | ¿Correcto? |
+def get_available_clients() -> list[str]:
+    """Get list of available client IDs."""
+    guidelines_path = Path(GUIDELINES_DIR)
+    clients = []
 
-PASO 1.3 - Detectar desviaciones de contenido:
-- Productos faltantes o en posición incorrecta
-- Textos que no coinciden exactamente
-- Elementos ausentes o añadidos sin especificar
+    if guidelines_path.exists():
+        for item in guidelines_path.iterdir():
+            if item.is_dir() and (item / "kpis.json").exists():
+                clients.append(item.name)
 
-███████████████████████████████████████████████████████████████
-FASE 2: CALIDAD DE EJECUCIÓN (Visual - Independiente del PDF)
-███████████████████████████████████████████████████████████████
+    return sorted(clients)
 
-Evalúa la CALIDAD VISUAL comparando la imagen enviada con la imagen de referencia del PDF:
 
-PASO 2.1 - Comparación de iluminación:
-- Observa el NIVEL DE BRILLO en la imagen de referencia del guideline
-- Compara con el nivel de brillo de la foto enviada
-- Detectar: ¿Más oscura? ¿Más brillante? ¿Similar?
-- Buscar: zonas con sombras excesivas, sobreexposición, luces apagadas
+def build_dynamic_prompt(kpis_config: dict) -> str:
+    """Build the analysis prompt dynamically based on client categories."""
 
-PASO 2.2 - Inspección de limpieza:
-- Polvo visible en superficies o productos
-- Manchas en cristales, espejos o superficies
-- Huellas dactilares visibles
-- Suciedad en el suelo visible
-- Elementos dañados, rayados o deteriorados
+    client_name = kpis_config.get("client_name", "Cliente")
+    categories = kpis_config.get("kpis", [])  # Now used as categories for classification
 
-PASO 2.3 - Calidad de la fotografía:
-- Imagen nítida vs borrosa/desenfocada
-- Reflejos que impiden ver el escaparate
-- Obstrucciones en la toma
+    # Construir lista de categorías
+    categories_list = "\n".join([f"- **{cat['name']}**: {cat['description']}" for cat in categories])
+    categories_names = [cat['name'] for cat in categories]
+
+    prompt = f"""You MUST respond with ONLY valid JSON. No additional text, explanations, or markdown before or after the JSON object.
 
 ███████████████████████████████████████████████████████████████
-ASIGNACIÓN DE KPIs
+PRINCIPIO FUNDAMENTAL - ERES UN INSPECTOR RIGUROSO
 ███████████████████████████████████████████████████████████████
 
-1. **Adecuación a requerimientos documentación** [FASE 1]
-   - Evalúa: productos, posiciones, layout según PDF
-   - Fuente: comparación directa con guideline
-   - Feedback: citar página específica del PDF
+EL GUIDELINE (PDF/IMAGEN DE REFERENCIA) ES LA VERDAD ABSOLUTA.
 
-2. **Iluminación** [FASE 2]
-   - Evalúa: nivel de luz COMPARADO con imagen de referencia del PDF
-   - Si referencia muestra escaparate bien iluminado y foto está oscura → DESVIACIÓN
-   - Si referencia muestra escaparate bien iluminado y foto está sobreexpuesta → DESVIACIÓN
-   - Si niveles de luz son similares a la referencia → CONFORME
-   - También detectar: luces apagadas, zonas sin iluminar, focos fundidos
+Tu trabajo es comparar la imagen enviada con el guideline y detectar TODAS las diferencias.
+Debes ser EXTREMADAMENTE RIGUROSO y CRÍTICO. Si algo no está EXACTAMENTE igual que en el guideline, es una diferencia que debe reportarse.
 
-3. **Marketing e imagen visual** [FASE 1]
-   - Evalúa: carteles, precios, señalética, materiales POP
-   - Fuente: comparación directa con guideline
-   - Verificar textos EXACTOS y ubicaciones
+IMPORTANTE:
+- Si el guideline muestra cables OCULTOS y la imagen tiene cables VISIBLES → CRÍTICO
+- Si el guideline muestra pantallas ENCENDIDAS y la imagen tiene pantallas APAGADAS → CRÍTICO
+- Si hay BASURA, objetos ajenos, suciedad que NO está en el guideline → CRÍTICO
+- Cualquier desorden evidente comparado con el guideline → penalización SEVERA
 
-4. **Limpieza** [FASE 2]
-   - Evalúa: estado físico visible (independiente del PDF)
-   - Detectar: polvo, manchas, cristales sucios, daños
-   - También: calidad de imagen (nitidez, obstrucciones)
+NO seas benevolente. NO redondees hacia arriba. Si ves un desastre, el score debe reflejarlo.
 
 ███████████████████████████████████████████████████████████████
-FORMATO DE FEEDBACK
+ESCALA DE SIMILITUD (similarity_score)
 ███████████████████████████████████████████████████████████████
 
-FASE 1 (Compliance) - Si hay desviación:
-"[DESVIACIÓN] Página {N} especifica: {requisito}. Imagen muestra: {observación}."
+El similarity_score es una evaluación GLOBAL de cuánto se parece la imagen al guideline:
 
-FASE 1 (Compliance) - Si conforme:
-"[CONFORME] Elementos verificados contra guideline: {lista}. Sin desviaciones."
+- **100**: IDÉNTICO al guideline. Ninguna diferencia visible.
+- **90-99**: Casi perfecto. Solo diferencias mínimas, imperceptibles.
+- **70-89**: Aceptable. Algunas diferencias menores pero el aspecto general es similar.
+- **50-69**: Deficiente. Diferencias notables que afectan la imagen.
+- **30-49**: Muy deficiente. Múltiples problemas graves.
+- **0-29**: INACEPTABLE. Desastre total. Muy diferente al guideline.
 
-FASE 2 (Calidad visual) - Si hay problema:
-"[DEFECTO VISUAL] {descripción objetiva del problema detectado}. Referencia muestra: {estado en PDF}. Imagen enviada muestra: {estado actual}."
+EJEMPLOS DE SCORES BAJOS:
+- Pantallas de dispositivos apagadas cuando deberían estar encendidas → -30 puntos mínimo
+- Cables desordenados/visibles cuando deberían estar ocultos → -25 puntos mínimo
+- Basura, vasos, papeles que no están en el guideline → -20 puntos por cada objeto
+- Productos en posiciones muy diferentes → -15 puntos por producto
 
-FASE 2 (Calidad visual) - Si conforme:
-"[CONFORME] Calidad visual consistente con imagen de referencia. {observación breve}."
+Si una imagen tiene múltiples problemas graves (pantallas apagadas + cables sueltos + basura),
+el score debe ser MUY BAJO (20-40 máximo).
 
 ███████████████████████████████████████████████████████████████
-PUNTUACIÓN
+PROCESO DE ANÁLISIS
 ███████████████████████████████████████████████████████████████
 
-- **100**: Sin desviaciones de contenido NI defectos visuales.
-- **95-99 (perfect)**: Mínimas diferencias imperceptibles.
-- **75-94 (correct)**: Desviaciones/defectos menores.
-- **50-74 (warning)**: Problemas notables que requieren corrección.
-- **0-49 (critical)**: Problemas graves o múltiples.
+PASO 1: Observa el guideline de referencia
+- Memoriza EXACTAMENTE cómo se ve cada elemento
+- Estado de pantallas/dispositivos (encendidos/apagados)
+- Posición y visibilidad de cables
+- Limpieza y orden general
+- Posición exacta de cada producto
+
+PASO 2: Compara la imagen enviada con OJO CRÍTICO
+- ¿Las pantallas están en el MISMO estado?
+- ¿Los cables están IGUAL de ordenados/ocultos?
+- ¿Hay objetos que NO deberían estar (basura, vasos, papeles)?
+- ¿Los productos están en las MISMAS posiciones?
+
+PASO 3: Lista TODAS las diferencias encontradas
+- Sé exhaustivo, no omitas nada
+- Clasifica cada diferencia en una categoría
+- Asigna un impacto realista (minor/moderate/high/critical)
+
+███████████████████████████████████████████████████████████████
+CATEGORÍAS PARA CLASIFICAR DIFERENCIAS
+███████████████████████████████████████████████████████████████
+
+{categories_list}
+
+███████████████████████████████████████████████████████████████
+NIVELES DE IMPACTO
+███████████████████████████████████████████████████████████████
+
+- **critical**: Problema gravísimo. Inmediatamente visible. Inaceptable.
+  Ejemplos: pantallas apagadas, basura visible, cables muy desordenados
+
+- **high**: Problema grave. Claramente visible. Requiere corrección urgente.
+  Ejemplos: productos en posición incorrecta, carteles torcidos
+
+- **moderate**: Problema notable. Visible al observar con atención.
+  Ejemplos: pequeñas diferencias de posición, iluminación ligeramente diferente
+
+- **minor**: Problema menor. Apenas perceptible.
+  Ejemplos: mínimas diferencias de ángulo, pequeñas variaciones de color
 
 ███████████████████████████████████████████████████████████████
 REGLAS CRÍTICAS
 ███████████████████████████████████████████████████████████████
 
-✗ NO ignorar problemas visuales obvios solo porque el contenido coincide
-✗ NO usar lenguaje subjetivo: "podría mejorar", "sería recomendable"
-✗ NO dar sugerencias si score >= 95
+✗ NUNCA seas benevolente con problemas evidentes
+✗ NUNCA des un score alto si hay problemas graves visibles
+✗ NUNCA ignores basura, suciedad u objetos que no están en el guideline
+✗ NUNCA asumas que "está bien" si no es IDÉNTICO
 
-✓ SÍ penalizar iluminación diferente a la referencia (más oscura O más brillante)
-✓ SÍ reportar suciedad/daños aunque el contenido sea correcto
-✓ SÍ citar página del guideline para desviaciones de FASE 1
-✓ SÍ comparar visualmente con la imagen del PDF para FASE 2
-
-suggestions = [] si score >= 95
-suggestions = ["acción correctiva específica"] si score < 95
+✓ SÍ penaliza severamente los problemas críticos
+✓ SÍ reporta TODAS las diferencias que veas
+✓ SÍ da scores muy bajos (20-40) si la imagen es un desastre
+✓ SÍ sé específico en las descripciones de los problemas
 
 ███████████████████████████████████████████████████████████████
-RESPUESTA JSON (SIN MARKDOWN)
+RESPUESTA JSON
 ███████████████████████████████████████████████████████████████
 
-{
-  "overall_score": <0-100>,
-  "kpis": [
-    {
-      "name": "Adecuación a requerimientos documentación",
-      "score": <0-100>,
-      "severity": "<perfect|correct|warning|critical>",
-      "feedback": "<FASE 1: compliance con guideline>",
-      "suggestions": []
-    },
-    {
-      "name": "Iluminación",
-      "score": <0-100>,
-      "severity": "<perfect|correct|warning|critical>",
-      "feedback": "<FASE 2: comparación visual con referencia>",
-      "suggestions": []
-    },
-    {
-      "name": "Marketing e imagen visual",
-      "score": <0-100>,
-      "severity": "<perfect|correct|warning|critical>",
-      "feedback": "<FASE 1: compliance con guideline>",
-      "suggestions": []
-    },
-    {
-      "name": "Limpieza",
-      "score": <0-100>,
-      "severity": "<perfect|correct|warning|critical>",
-      "feedback": "<FASE 2: inspección visual>",
-      "suggestions": []
-    }
-  ]
-}
+{{
+  "similarity_score": <0-100>,
+  "similarity_verdict": "<perfect|acceptable|deficient|critical>",
+  "differences": [
+    {{
+      "description": "<descripción específica de la diferencia>",
+      "category": "<una de: {', '.join(categories_names)}>",
+      "impact": "<minor|moderate|high|critical>",
+      "action": "<acción específica para igualar al guideline>"
+    }}
+  ],
+  "category_summary": {{
+    {', '.join([f'"{cat}": {{"issues": "<número>", "max_impact": "<minor|moderate|high|critical|null>"}}' for cat in categories_names])}
+  }}
+}}
 
-CRITICAL REMINDER: Your entire response must be valid JSON that can be parsed directly with json.loads(). Do not include any text before the opening { or after the closing }. Do not wrap in markdown code blocks.
-"""
+NOTAS:
+- Si no hay diferencias: differences = [], similarity_score = 100, similarity_verdict = "perfect"
+- similarity_verdict: "perfect" (90-100), "acceptable" (70-89), "deficient" (50-69), "critical" (0-49)
+- category_summary.max_impact es null si issues = 0 para esa categoría
+
+CRITICAL: Be HARSH and REALISTIC. If you see a mess (screens off, cables everywhere, trash), the score MUST be very low (20-40). Do NOT be lenient."""
+
+    return prompt
+
 
 
 def get_image_media_type(file_path: str) -> str:
@@ -237,19 +243,23 @@ def render_pdf_pages_as_images(pdf_path: str, dpi: int = 150) -> list[tuple[str,
     return images
 
 
-def load_guidelines() -> list[dict]:
-    """Load all reference guidelines from the guidelines directory."""
-    guidelines_path = Path(GUIDELINES_DIR)
+def load_guidelines(client_id: str) -> list[dict]:
+    """Load all reference guidelines from the client's directory."""
+    client_path = Path(GUIDELINES_DIR) / client_id
     content_blocks = []
 
-    if not guidelines_path.exists():
+    if not client_path.exists():
         return content_blocks
 
     supported_images = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 
-    for file_path in sorted(guidelines_path.iterdir()):
+    for file_path in sorted(client_path.iterdir()):
         if file_path.is_file():
             ext = file_path.suffix.lower()
+
+            # Skip kpis.json configuration file
+            if file_path.name == "kpis.json":
+                continue
 
             if ext in supported_images:
                 data, media_type = load_image_as_base64(str(file_path))
@@ -293,7 +303,8 @@ def load_guidelines() -> list[dict]:
 
 async def analyze_storefront(
     image_path: str,
-    store_id: str
+    store_id: str,
+    client_id: str
 ) -> dict:
     """
     Analyze a storefront image using Claude Vision.
@@ -301,10 +312,18 @@ async def analyze_storefront(
     Args:
         image_path: Path to the uploaded storefront image
         store_id: Identifier for the store
+        client_id: Identifier for the client (determines which KPIs and guidelines to use)
 
     Returns:
         Analysis result with KPIs and token usage
     """
+    # Load client KPIs configuration
+    kpis_config = load_client_kpis(client_id)
+    analysis_prompt = build_dynamic_prompt(kpis_config)
+
+    logger.info(f"[{store_id}] Using client: {client_id} ({kpis_config.get('client_name', 'Unknown')})")
+    logger.info(f"[{store_id}] KPIs to evaluate: {len(kpis_config.get('kpis', []))}")
+
     client = anthropic.Anthropic()
 
     # Load the storefront image
@@ -314,11 +333,11 @@ async def analyze_storefront(
     content = []
 
     # Add guidelines first (if any)
-    guidelines = load_guidelines()
+    guidelines = load_guidelines(client_id)
     if guidelines:
         content.append({
             "type": "text",
-            "text": "## Guidelines de referencia para el escaparate:\n"
+            "text": f"## Guidelines de referencia para {kpis_config.get('client_name', 'el escaparate')}:\n"
         })
         content.extend(guidelines)
         content.append({
@@ -328,7 +347,7 @@ async def analyze_storefront(
     else:
         content.append({
             "type": "text",
-            "text": f"## Imagen del escaparate a analizar (Store ID: {store_id}):\n\nNota: No hay guidelines de referencia disponibles. Evalúa basándote en mejores prácticas de retail.\n"
+            "text": f"## Imagen del escaparate a analizar (Store ID: {store_id}):\n\nNota: No hay guidelines de referencia disponibles para {kpis_config.get('client_name', 'este cliente')}. Evalúa basándote en las descripciones de los KPIs.\n"
         })
 
     # Add the storefront image to analyze
@@ -352,7 +371,7 @@ async def analyze_storefront(
                 "content": content
             }
         ],
-        system=ANALYSIS_PROMPT
+        system=analysis_prompt
     )
 
     # Extract token usage

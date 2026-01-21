@@ -14,6 +14,7 @@ async def init_db():
             CREATE TABLE IF NOT EXISTS analyses (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 store_id TEXT NOT NULL,
+                client_id TEXT NOT NULL DEFAULT '',
                 image_filename TEXT NOT NULL,
                 result_json TEXT NOT NULL,
                 tokens_input INTEGER NOT NULL,
@@ -25,6 +26,9 @@ async def init_db():
             CREATE INDEX IF NOT EXISTS idx_store_id ON analyses(store_id)
         """)
         await db.execute("""
+            CREATE INDEX IF NOT EXISTS idx_client_id ON analyses(client_id)
+        """)
+        await db.execute("""
             CREATE INDEX IF NOT EXISTS idx_created_at ON analyses(created_at)
         """)
         await db.commit()
@@ -32,6 +36,7 @@ async def init_db():
 
 async def save_analysis(
     store_id: str,
+    client_id: str,
     image_filename: str,
     result_json: dict,
     tokens_input: int,
@@ -41,11 +46,12 @@ async def save_analysis(
     async with aiosqlite.connect(DATABASE_PATH) as db:
         cursor = await db.execute(
             """
-            INSERT INTO analyses (store_id, image_filename, result_json, tokens_input, tokens_output, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO analyses (store_id, client_id, image_filename, result_json, tokens_input, tokens_output, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 store_id,
+                client_id,
                 image_filename,
                 json.dumps(result_json, ensure_ascii=False),
                 tokens_input,
@@ -67,7 +73,7 @@ async def get_analysis(analysis_id: int) -> Optional[dict]:
         )
         row = await cursor.fetchone()
         if row:
-            return {
+            result = {
                 "id": row["id"],
                 "store_id": row["store_id"],
                 "image_filename": row["image_filename"],
@@ -76,6 +82,12 @@ async def get_analysis(analysis_id: int) -> Optional[dict]:
                 "tokens_output": row["tokens_output"],
                 "created_at": row["created_at"]
             }
+            # Add client_id if column exists (backwards compatibility)
+            try:
+                result["client_id"] = row["client_id"]
+            except (KeyError, IndexError):
+                result["client_id"] = ""
+            return result
         return None
 
 
@@ -93,8 +105,9 @@ async def get_analyses_by_store(store_id: str, limit: int = 50) -> list[dict]:
             (store_id, limit)
         )
         rows = await cursor.fetchall()
-        return [
-            {
+        results = []
+        for row in rows:
+            item = {
                 "id": row["id"],
                 "store_id": row["store_id"],
                 "image_filename": row["image_filename"],
@@ -103,5 +116,10 @@ async def get_analyses_by_store(store_id: str, limit: int = 50) -> list[dict]:
                 "tokens_output": row["tokens_output"],
                 "created_at": row["created_at"]
             }
-            for row in rows
-        ]
+            # Add client_id if column exists (backwards compatibility)
+            try:
+                item["client_id"] = row["client_id"]
+            except (KeyError, IndexError):
+                item["client_id"] = ""
+            results.append(item)
+        return results
