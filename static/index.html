@@ -12,9 +12,9 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a1a2e;
-            color: #eee;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+            background: #F5F5F5;
+            color: #212121;
             min-height: 100vh;
             padding: 16px;
         }
@@ -24,39 +24,75 @@
             margin: 0 auto;
         }
 
-        h1 {
-            text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #fff;
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 0 20px;
+            position: relative;
         }
 
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #212121;
+        }
+
+        /* Cards */
+        .card {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #9E9E9E;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        /* Form elements */
         .form-group {
             margin-bottom: 16px;
         }
 
         label {
             display: block;
-            margin-bottom: 6px;
-            font-size: 0.9rem;
-            color: #aaa;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #757575;
         }
 
         select, input[type="text"] {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #333;
-            border-radius: 8px;
-            background: #16213e;
-            color: #fff;
+            padding: 14px 16px;
+            border: 1px solid #E0E0E0;
+            border-radius: 12px;
+            background: #FFFFFF;
+            color: #212121;
             font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #E91E63;
+            box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+        }
+
+        /* Capture area */
         .capture-area {
-            background: #16213e;
-            border: 2px dashed #444;
-            border-radius: 12px;
-            padding: 20px;
+            background: #FAFAFA;
+            border: 2px dashed #E0E0E0;
+            border-radius: 16px;
+            padding: 32px 20px;
             text-align: center;
             margin-bottom: 16px;
             min-height: 200px;
@@ -64,253 +100,439 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            transition: border-color 0.2s, background 0.2s;
         }
 
         .capture-area.has-image {
             border-style: solid;
             border-color: #4CAF50;
+            background: #F1F8E9;
         }
 
         #preview {
             max-width: 100%;
             max-height: 300px;
-            border-radius: 8px;
+            border-radius: 12px;
             display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .capture-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .capture-btn {
-            background: #0f3460;
-            color: #fff;
-            border: none;
-            padding: 16px 32px;
-            border-radius: 50px;
-            font-size: 1rem;
+            background: #FFFFFF;
+            color: #212121;
+            border: 1px solid #E0E0E0;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 0.9rem;
+            font-weight: 500;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
-            margin: 10px 0;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .capture-btn:hover {
+            background: #F5F5F5;
+            border-color: #BDBDBD;
         }
 
         .capture-btn:active {
-            background: #1a4a7a;
+            transform: scale(0.98);
         }
 
         .capture-btn svg {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
+            color: #E91E63;
         }
 
         #fileInput {
             display: none;
         }
 
+        /* Primary button */
         .analyze-btn {
             width: 100%;
             padding: 16px;
-            background: #4CAF50;
-            color: #fff;
+            background: #E91E63;
+            color: #FFFFFF;
             border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
+            border-radius: 24px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 10px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
         }
 
         .analyze-btn:disabled {
-            background: #333;
-            color: #666;
+            background: #E0E0E0;
+            color: #9E9E9E;
             cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .analyze-btn:not(:disabled):hover {
+            background: #D81B60;
+            box-shadow: 0 6px 16px rgba(233, 30, 99, 0.4);
         }
 
         .analyze-btn:not(:disabled):active {
-            background: #45a049;
+            transform: scale(0.98);
         }
 
+        /* Results section */
         .results {
             margin-top: 24px;
             display: none;
         }
 
+        /* Score card */
         .score-card {
-            background: #16213e;
-            border-radius: 12px;
-            padding: 20px;
+            background: linear-gradient(135deg, #FFFFFF 0%, #FAFAFA 100%);
+            border-radius: 20px;
+            padding: 32px 24px;
             text-align: center;
             margin-bottom: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .score-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A, #FFC107, #F44336);
         }
 
         .score-value {
             font-size: 4rem;
             font-weight: 700;
             line-height: 1;
+            color: #212121;
         }
 
         .score-label {
-            font-size: 0.9rem;
-            color: #aaa;
+            font-size: 0.875rem;
+            color: #757575;
             margin-top: 8px;
+            font-weight: 500;
         }
 
         .verdict {
             display: inline-block;
-            padding: 6px 16px;
+            padding: 8px 20px;
             border-radius: 20px;
             font-weight: 600;
-            margin-top: 12px;
+            margin-top: 16px;
             text-transform: uppercase;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
         }
 
-        .verdict.perfect { background: #4CAF50; }
-        .verdict.acceptable { background: #8BC34A; }
-        .verdict.deficient { background: #FF9800; }
-        .verdict.critical { background: #f44336; }
+        .verdict.perfect, .verdict.excellent {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+        .verdict.acceptable, .verdict.good {
+            background: #F1F8E9;
+            color: #558B2F;
+        }
+        .verdict.deficient, .verdict.needs-improvement {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+        .verdict.critical {
+            background: #FFEBEE;
+            color: #C62828;
+        }
 
-        .differences-section {
-            background: #16213e;
-            border-radius: 12px;
-            padding: 16px;
+        /* KPIs section */
+        .kpis-section {
             margin-bottom: 16px;
         }
 
         .section-title {
             font-size: 1rem;
             font-weight: 600;
+            margin-bottom: 16px;
+            color: #212121;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title svg {
+            width: 20px;
+            height: 20px;
+            color: #E91E63;
+        }
+
+        /* KPI Item */
+        .kpi-item {
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 16px;
             margin-bottom: 12px;
-            color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border-left: 4px solid #E0E0E0;
         }
 
-        .difference-item {
-            background: #1a1a2e;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-left: 4px solid #666;
-        }
+        .kpi-item.excellent { border-left-color: #4CAF50; }
+        .kpi-item.good { border-left-color: #8BC34A; }
+        .kpi-item.needs-improvement { border-left-color: #FFC107; }
+        .kpi-item.critical { border-left-color: #F44336; }
 
-        .difference-item.critical { border-left-color: #f44336; }
-        .difference-item.high { border-left-color: #FF9800; }
-        .difference-item.moderate { border-left-color: #FFC107; }
-        .difference-item.minor { border-left-color: #8BC34A; }
-
-        .diff-header {
+        .kpi-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
+            align-items: flex-start;
+            margin-bottom: 8px;
         }
 
-        .diff-category {
+        .kpi-name {
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            color: #212121;
+            flex: 1;
         }
 
-        .diff-impact {
-            font-size: 0.75rem;
-            padding: 2px 8px;
+        .kpi-score {
+            font-size: 1.25rem;
+            font-weight: 700;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .kpi-score.excellent { color: #4CAF50; }
+        .kpi-score.good { color: #8BC34A; }
+        .kpi-score.needs-improvement { color: #FFC107; }
+        .kpi-score.critical { color: #F44336; }
+
+        .kpi-severity {
+            font-size: 0.7rem;
+            padding: 3px 8px;
             border-radius: 10px;
             text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            margin-left: 8px;
         }
 
-        .diff-impact.critical { background: #f44336; }
-        .diff-impact.high { background: #FF9800; }
-        .diff-impact.moderate { background: #FFC107; color: #000; }
-        .diff-impact.minor { background: #8BC34A; }
-
-        .diff-description {
-            font-size: 0.85rem;
-            color: #ccc;
-            margin-bottom: 6px;
+        .kpi-severity.excellent {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+        .kpi-severity.good {
+            background: #F1F8E9;
+            color: #558B2F;
+        }
+        .kpi-severity.needs-improvement {
+            background: #FFF8E1;
+            color: #F57F17;
+        }
+        .kpi-severity.critical {
+            background: #FFEBEE;
+            color: #C62828;
         }
 
-        .diff-action {
-            font-size: 0.8rem;
-            color: #4CAF50;
-            font-style: italic;
+        .kpi-feedback {
+            font-size: 0.875rem;
+            color: #616161;
+            margin-bottom: 12px;
+            line-height: 1.5;
         }
 
+        .kpi-suggestions {
+            background: #FAFAFA;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .kpi-suggestions-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #9E9E9E;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .kpi-suggestion {
+            font-size: 0.825rem;
+            color: #424242;
+            padding: 6px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .kpi-suggestion::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            width: 6px;
+            height: 6px;
+            background: #E91E63;
+            border-radius: 50%;
+        }
+
+        /* Progress bar */
+        .kpi-progress {
+            height: 6px;
+            background: #E0E0E0;
+            border-radius: 3px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+
+        .kpi-progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .kpi-progress-fill.excellent { background: linear-gradient(90deg, #4CAF50, #66BB6A); }
+        .kpi-progress-fill.good { background: linear-gradient(90deg, #8BC34A, #9CCC65); }
+        .kpi-progress-fill.needs-improvement { background: linear-gradient(90deg, #FFC107, #FFCA28); }
+        .kpi-progress-fill.critical { background: linear-gradient(90deg, #F44336, #EF5350); }
+
+        /* No differences */
         .no-differences {
             text-align: center;
             color: #4CAF50;
-            padding: 20px;
+            padding: 32px 20px;
+            background: #E8F5E9;
+            border-radius: 12px;
         }
 
+        .no-differences svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+        }
+
+        /* Loading */
         .loading {
             display: none;
             text-align: center;
-            padding: 40px;
+            padding: 48px 20px;
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #333;
-            border-top-color: #4CAF50;
+            width: 48px;
+            height: 48px;
+            border: 4px solid #E0E0E0;
+            border-top-color: #E91E63;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 16px;
+        }
+
+        .loading p {
+            color: #757575;
+            font-size: 0.9rem;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
+        /* Error */
         .error {
-            background: #f44336;
-            color: #fff;
-            padding: 12px;
-            border-radius: 8px;
+            background: #FFEBEE;
+            color: #C62828;
+            padding: 16px;
+            border-radius: 12px;
             margin-top: 16px;
             display: none;
+            font-size: 0.9rem;
+            border: 1px solid #FFCDD2;
         }
 
+        /* Reset button */
         .reset-btn {
             width: 100%;
-            padding: 12px;
-            background: transparent;
-            color: #aaa;
-            border: 1px solid #444;
-            border-radius: 8px;
-            font-size: 1rem;
+            padding: 14px;
+            background: #FFFFFF;
+            color: #757575;
+            border: 1px solid #E0E0E0;
+            border-radius: 24px;
+            font-size: 0.9rem;
+            font-weight: 500;
             cursor: pointer;
             margin-top: 16px;
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            background: #F5F5F5;
+            color: #424242;
+        }
+
+        /* Tokens info */
+        .tokens-info {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #9E9E9E;
+            margin-top: 12px;
+            padding: 8px;
+            background: #FAFAFA;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Storefront Analyzer</h1>
+        <header class="header">
+            <h1>Storefront Analyzer</h1>
+        </header>
 
-        <div class="form-group">
-            <label for="clientSelect">Cliente</label>
-            <select id="clientSelect">
-                <option value="">Cargando clientes...</option>
-            </select>
-        </div>
+        <div class="card">
+            <div class="form-group">
+                <label for="clientSelect">Cliente</label>
+                <select id="clientSelect">
+                    <option value="">Cargando clientes...</option>
+                </select>
+            </div>
 
-        <div class="form-group">
-            <label for="storeId">ID de Tienda</label>
-            <input type="text" id="storeId" placeholder="ej: tienda_001">
+            <div class="form-group">
+                <label for="storeId">ID de Tienda</label>
+                <input type="text" id="storeId" placeholder="ej: tienda_001">
+            </div>
         </div>
 
         <div class="capture-area" id="captureArea">
             <img id="preview" alt="Vista previa">
             <div id="capturePrompt">
-                <button class="capture-btn" id="cameraBtn">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 15.2a3.2 3.2 0 100-6.4 3.2 3.2 0 000 6.4z"/>
-                        <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
-                    </svg>
-                    Tomar Foto
-                </button>
-                <button class="capture-btn" id="galleryBtn">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                    </svg>
-                    Galería
-                </button>
+                <p style="color: #9E9E9E; margin-bottom: 16px; font-size: 0.9rem;">Captura una foto del escaparate</p>
+                <div class="capture-buttons">
+                    <button class="capture-btn" id="cameraBtn">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 15.2a3.2 3.2 0 100-6.4 3.2 3.2 0 000 6.4z"/>
+                            <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+                        </svg>
+                        Cámara
+                    </button>
+                    <button class="capture-btn" id="galleryBtn">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                        </svg>
+                        Galería
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -328,14 +550,21 @@
         <div class="results" id="results">
             <div class="score-card">
                 <div class="score-value" id="scoreValue">--</div>
-                <div class="score-label">Puntuación de Similitud</div>
+                <div class="score-label">Puntuación General</div>
                 <div class="verdict" id="verdict">--</div>
             </div>
 
-            <div class="differences-section">
-                <div class="section-title">Diferencias Detectadas</div>
-                <div id="differencesList"></div>
+            <div class="kpis-section card">
+                <div class="section-title">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                    Detalle por KPI
+                </div>
+                <div id="kpisList"></div>
             </div>
+
+            <div class="tokens-info" id="tokensInfo"></div>
 
             <button class="reset-btn" id="resetBtn">Nueva Foto</button>
         </div>
@@ -361,7 +590,8 @@
         const results = document.getElementById('results');
         const scoreValue = document.getElementById('scoreValue');
         const verdict = document.getElementById('verdict');
-        const differencesList = document.getElementById('differencesList');
+        const kpisList = document.getElementById('kpisList');
+        const tokensInfo = document.getElementById('tokensInfo');
         const resetBtn = document.getElementById('resetBtn');
 
         // Load clients on page load
@@ -374,7 +604,7 @@
                 clients.forEach(client => {
                     const option = document.createElement('option');
                     option.value = client.client_id;
-                    option.textContent = `${client.client_name} (${client.kpis_count} categorías)`;
+                    option.textContent = `${client.client_name} (${client.kpis_count} KPIs)`;
                     clientSelect.appendChild(option);
                 });
             } catch (err) {
@@ -457,45 +687,79 @@
             }
         });
 
+        // Get severity class based on score
+        function getSeverityClass(score) {
+            if (score >= 90) return 'excellent';
+            if (score >= 70) return 'good';
+            if (score >= 50) return 'needs-improvement';
+            return 'critical';
+        }
+
+        // Get severity class for impact
+        function getImpactClass(impact) {
+            const mapping = {
+                'minor': 'good',
+                'moderate': 'needs-improvement',
+                'high': 'needs-improvement',
+                'critical': 'critical'
+            };
+            return mapping[impact] || 'needs-improvement';
+        }
+
         // Display results
         function displayResults(result) {
-            // Score
+            // Score - uses similarity_score from API
             scoreValue.textContent = result.similarity_score;
-            scoreValue.style.color = getScoreColor(result.similarity_score);
+            const scoreClass = getSeverityClass(result.similarity_score);
+            scoreValue.className = `score-value ${scoreClass}`;
 
-            // Verdict
-            verdict.textContent = getVerdictText(result.similarity_verdict);
+            // Verdict - uses similarity_verdict from API
+            const verdictText = getVerdictText(result.similarity_verdict);
+            verdict.textContent = verdictText;
             verdict.className = `verdict ${result.similarity_verdict}`;
 
             // Differences
-            differencesList.innerHTML = '';
+            kpisList.innerHTML = '';
 
             if (!result.differences || result.differences.length === 0) {
-                differencesList.innerHTML = '<div class="no-differences">Sin diferencias detectadas</div>';
+                kpisList.innerHTML = `
+                    <div class="no-differences">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        <p>Escaparate perfecto</p>
+                    </div>
+                `;
             } else {
                 result.differences.forEach(diff => {
+                    const impactClass = getImpactClass(diff.impact);
                     const item = document.createElement('div');
-                    item.className = `difference-item ${diff.impact}`;
+                    item.className = `kpi-item ${impactClass}`;
+
                     item.innerHTML = `
-                        <div class="diff-header">
-                            <span class="diff-category">${diff.category}</span>
-                            <span class="diff-impact ${diff.impact}">${diff.impact}</span>
+                        <div class="kpi-header">
+                            <span class="kpi-name">${diff.category}</span>
+                            <span class="kpi-severity ${impactClass}">${diff.impact}</span>
                         </div>
-                        <div class="diff-description">${diff.description}</div>
-                        <div class="diff-action">${diff.action}</div>
+                        <div class="kpi-feedback">${diff.description}</div>
+                        <div class="kpi-suggestions">
+                            <div class="kpi-suggestions-title">Acción recomendada</div>
+                            <div class="kpi-suggestion">${diff.action}</div>
+                        </div>
                     `;
-                    differencesList.appendChild(item);
+                    kpisList.appendChild(item);
                 });
             }
 
-            results.style.display = 'block';
-        }
+            // Tokens info
+            if (result.tokens_used) {
+                tokensInfo.innerHTML = `Tokens utilizados: ${result.tokens_used.input.toLocaleString()} entrada / ${result.tokens_used.output.toLocaleString()} salida`;
+                tokensInfo.style.display = 'block';
+            } else {
+                tokensInfo.style.display = 'none';
+            }
 
-        function getScoreColor(score) {
-            if (score >= 90) return '#4CAF50';
-            if (score >= 70) return '#8BC34A';
-            if (score >= 50) return '#FF9800';
-            return '#f44336';
+            results.style.display = 'block';
         }
 
         function getVerdictText(verdict) {
