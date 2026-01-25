@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 load_dotenv()
 
-from analyzer_service import analyze_storefront, get_available_clients, load_client_kpis
+from analyzer_service import analyze_storefront, get_available_clients, load_generic_kpis
 from database import get_analyses_by_store, get_analysis, init_db, save_analysis
 
 UPLOADS_DIR = os.getenv("UPLOADS_DIR", "./uploads")
@@ -96,41 +96,26 @@ async def root():
 @app.get("/clients")
 async def list_clients():
     """
-    Lista los clientes disponibles con sus configuraciones de KPIs.
+    Lista los clientes disponibles (carpetas con imágenes de referencia).
     """
     clients = get_available_clients()
-    result = []
-
-    for client_id in clients:
-        try:
-            config = load_client_kpis(client_id)
-            result.append({
-                "client_id": client_id,
-                "client_name": config.get("client_name", client_id),
-                "description": config.get("description", ""),
-                "kpis_count": len(config.get("kpis", [])),
-                "kpis": [kpi["name"] for kpi in config.get("kpis", [])]
-            })
-        except Exception:
-            continue
-
-    return result
+    return [{"client_id": c, "client_name": c} for c in clients]
 
 
 @app.post("/analyze")
 async def analyze_endpoint(
     image: UploadFile = File(..., description="Imagen del escaparate a analizar"),
     store_id: str = Form(..., description="Identificador de la tienda"),
-    client_id: str = Form(..., description="Identificador del cliente (ej: cliente_a, cliente_b)")
+    client_id: str = Form(..., description="Identificador del cliente (ej: cliente_a)")
 ):
     """
-    Analiza una imagen de escaparate comparándola con las guidelines de referencia.
+    Analiza una imagen de escaparate comparándola con el planograma del cliente.
 
     - **image**: Imagen del escaparate (JPG, PNG, GIF, WebP)
     - **store_id**: Identificador único de la tienda
     - **client_id**: Identificador del cliente (usa GET /clients para ver disponibles)
 
-    Retorna puntuaciones para los KPIs configurados del cliente.
+    Retorna score de similitud y diferencias categorizadas por KPI.
     """
     # Validate client exists
     available_clients = get_available_clients()
@@ -139,6 +124,7 @@ async def analyze_endpoint(
             status_code=400,
             detail=f"Cliente no encontrado: {client_id}. Clientes disponibles: {', '.join(available_clients)}"
         )
+
     # Validate API key is configured
     if not os.getenv("ANTHROPIC_API_KEY"):
         raise HTTPException(

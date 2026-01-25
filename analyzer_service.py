@@ -14,167 +14,87 @@ logger = logging.getLogger(__name__)
 
 GUIDELINES_DIR = os.getenv("GUIDELINES_DIR", "./reference_guidelines")
 MODEL_NAME = os.getenv("MODEL_NAME", "claude-haiku-4-5-20251001")
+GENERIC_KPIS_PATH = os.getenv("GENERIC_KPIS_PATH", "./kpis_generic.json")
 
 
-def load_client_kpis(client_id: str) -> dict:
-    """Load KPI configuration for a specific client."""
-    kpis_path = Path(GUIDELINES_DIR) / client_id / "kpis.json"
+def load_generic_kpis() -> dict:
+    """Load generic KPI configuration for MVP."""
+    kpis_path = Path(GENERIC_KPIS_PATH)
 
     if not kpis_path.exists():
-        raise FileNotFoundError(f"No se encontró configuración de KPIs para cliente: {client_id}")
+        raise FileNotFoundError(f"No se encontró configuración de KPIs genéricos: {kpis_path}")
 
     with open(kpis_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
 def get_available_clients() -> list[str]:
-    """Get list of available client IDs."""
+    """Get list of available client IDs (folders with images)."""
     guidelines_path = Path(GUIDELINES_DIR)
     clients = []
+    supported_files = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf"}
 
     if guidelines_path.exists():
         for item in guidelines_path.iterdir():
-            if item.is_dir() and (item / "kpis.json").exists():
-                clients.append(item.name)
+            if item.is_dir():
+                # Check if folder has any supported image/pdf files
+                has_files = any(f.suffix.lower() in supported_files for f in item.iterdir() if f.is_file())
+                if has_files:
+                    clients.append(item.name)
 
     return sorted(clients)
 
 
+def load_text_guidelines(client_id: str) -> Optional[str]:
+    """Load text guidelines from client's guidelines.md file."""
+    client_path = Path(GUIDELINES_DIR) / client_id
+    guidelines_file = client_path / "guidelines.md"
+
+    if guidelines_file.exists():
+        with open(guidelines_file, "r", encoding="utf-8") as f:
+            return f.read().strip()
+
+    return None
+
+
 def build_dynamic_prompt(kpis_config: dict) -> str:
-    """Build the analysis prompt dynamically based on client categories."""
+    """Build the analysis prompt dynamically based on KPIs configuration."""
 
-    client_name = kpis_config.get("client_name", "Cliente")
-    categories = kpis_config.get("kpis", [])  # Now used as categories for classification
+    kpis = kpis_config.get("kpis", [])
 
-    # Construir lista de categorías
-    categories_list = "\n".join([f"- **{cat['name']}**: {cat['description']}" for cat in categories])
-    categories_names = [cat['name'] for cat in categories]
+    # Construir lista de categorías KPI
+    kpi_categories = []
+    for kpi in kpis:
+        checks = kpi.get('what_to_check', [])
+        checks_str = ', '.join(checks) if checks else kpi.get('description', '')
+        kpi_categories.append(f"- **{kpi['name']}**: {checks_str}")
 
-    prompt = f"""You MUST respond with ONLY valid JSON. No additional text, explanations, or markdown before or after the JSON object.
+    kpis_list = "\n".join(kpi_categories)
+    kpi_names = [kpi['name'] for kpi in kpis]
 
-███████████████████████████████████████████████████████████████
-PRINCIPIO FUNDAMENTAL - ERES UN INSPECTOR RIGUROSO
-███████████████████████████████████████████████████████████████
+    prompt = f"""Responde SOLO con JSON válido.
 
-EL GUIDELINE (PDF/IMAGEN DE REFERENCIA) ES LA VERDAD ABSOLUTA.
+TAREA: Evaluar el escaparate según las INSTRUCCIONES ESPECÍFICAS DEL CLIENTE.
 
-Tu trabajo es comparar la imagen enviada con el guideline y detectar TODAS las diferencias.
-Debes ser EXTREMADAMENTE RIGUROSO y CRÍTICO. Si algo no está EXACTAMENTE igual que en el guideline, es una diferencia que debe reportarse.
+PRIORIDAD ABSOLUTA: Las instrucciones del cliente (PUNTOS CRÍTICOS e IGNORAR) son la referencia principal.
+- Si el cliente dice que algo es CRÍTICO, verifícalo.
+- Si el cliente dice que algo se debe IGNORAR, no lo reportes.
 
-IMPORTANTE:
-- Si el guideline muestra cables OCULTOS y la imagen tiene cables VISIBLES → CRÍTICO
-- Si el guideline muestra pantallas ENCENDIDAS y la imagen tiene pantallas APAGADAS → CRÍTICO
-- Si hay BASURA, objetos ajenos, suciedad que NO está en el guideline → CRÍTICO
-- Cualquier desorden evidente comparado con el guideline → penalización SEVERA
+REGLA DE CONFIANZA: Solo reporta algo si estás seguro de que incumple las instrucciones del cliente.
 
-NO seas benevolente. NO redondees hacia arriba. Si ves un desastre, el score debe reflejarlo.
-
-███████████████████████████████████████████████████████████████
-ESCALA DE SIMILITUD (similarity_score)
-███████████████████████████████████████████████████████████████
-
-El similarity_score es una evaluación GLOBAL de cuánto se parece la imagen al guideline:
-
-- **100**: IDÉNTICO al guideline. Ninguna diferencia visible.
-- **90-99**: Casi perfecto. Solo diferencias mínimas, imperceptibles.
-- **70-89**: Aceptable. Algunas diferencias menores pero el aspecto general es similar.
-- **50-69**: Deficiente. Diferencias notables que afectan la imagen.
-- **30-49**: Muy deficiente. Múltiples problemas graves.
-- **0-29**: INACEPTABLE. Desastre total. Muy diferente al guideline.
-
-EJEMPLOS DE SCORES BAJOS:
-- Pantallas de dispositivos apagadas cuando deberían estar encendidas → -30 puntos mínimo
-- Cables desordenados/visibles cuando deberían estar ocultos → -25 puntos mínimo
-- Basura, vasos, papeles que no están en el guideline → -20 puntos por cada objeto
-- Productos en posiciones muy diferentes → -15 puntos por producto
-
-Si una imagen tiene múltiples problemas graves (pantallas apagadas + cables sueltos + basura),
-el score debe ser MUY BAJO (20-40 máximo).
-
-███████████████████████████████████████████████████████████████
-PROCESO DE ANÁLISIS
-███████████████████████████████████████████████████████████████
-
-PASO 1: Observa el guideline de referencia
-- Memoriza EXACTAMENTE cómo se ve cada elemento
-- Estado de pantallas/dispositivos (encendidos/apagados)
-- Posición y visibilidad de cables
-- Limpieza y orden general
-- Posición exacta de cada producto
-
-PASO 2: Compara la imagen enviada con OJO CRÍTICO
-- ¿Las pantallas están en el MISMO estado?
-- ¿Los cables están IGUAL de ordenados/ocultos?
-- ¿Hay objetos que NO deberían estar (basura, vasos, papeles)?
-- ¿Los productos están en las MISMAS posiciones?
-
-PASO 3: Lista TODAS las diferencias encontradas
-- Sé exhaustivo, no omitas nada
-- Clasifica cada diferencia en una categoría
-- Asigna un impacto realista (minor/moderate/high/critical)
-
-███████████████████████████████████████████████████████████████
-CATEGORÍAS PARA CLASIFICAR DIFERENCIAS
-███████████████████████████████████████████████████████████████
-
-{categories_list}
-
-███████████████████████████████████████████████████████████████
-NIVELES DE IMPACTO
-███████████████████████████████████████████████████████████████
-
-- **critical**: Problema gravísimo. Inmediatamente visible. Inaceptable.
-  Ejemplos: pantallas apagadas, basura visible, cables muy desordenados
-
-- **high**: Problema grave. Claramente visible. Requiere corrección urgente.
-  Ejemplos: productos en posición incorrecta, carteles torcidos
-
-- **moderate**: Problema notable. Visible al observar con atención.
-  Ejemplos: pequeñas diferencias de posición, iluminación ligeramente diferente
-
-- **minor**: Problema menor. Apenas perceptible.
-  Ejemplos: mínimas diferencias de ángulo, pequeñas variaciones de color
-
-███████████████████████████████████████████████████████████████
-REGLAS CRÍTICAS
-███████████████████████████████████████████████████████████████
-
-✗ NUNCA seas benevolente con problemas evidentes
-✗ NUNCA des un score alto si hay problemas graves visibles
-✗ NUNCA ignores basura, suciedad u objetos que no están en el guideline
-✗ NUNCA asumas que "está bien" si no es IDÉNTICO
-
-✓ SÍ penaliza severamente los problemas críticos
-✓ SÍ reporta TODAS las diferencias que veas
-✓ SÍ da scores muy bajos (20-40) si la imagen es un desastre
-✓ SÍ sé específico en las descripciones de los problemas
-
-███████████████████████████████████████████████████████████████
-RESPUESTA JSON
-███████████████████████████████████████████████████████████████
-
+RESPUESTA JSON:
 {{
-  "similarity_score": <0-100>,
-  "similarity_verdict": "<perfect|acceptable|deficient|critical>",
   "differences": [
     {{
-      "description": "<descripción específica de la diferencia>",
-      "category": "<una de: {', '.join(categories_names)}>",
-      "impact": "<minor|moderate|high|critical>",
-      "action": "<acción específica para igualar al guideline>"
+      "category": "<{', '.join(kpi_names)}>",
+      "description": "<qué incumple de las instrucciones>",
+      "action": "<qué hacer para cumplir>"
     }}
   ],
-  "category_summary": {{
-    {', '.join([f'"{cat}": {{"issues": "<número>", "max_impact": "<minor|moderate|high|critical|null>"}}' for cat in categories_names])}
-  }}
+  "summary": "<resumen breve>"
 }}
 
-NOTAS:
-- Si no hay diferencias: differences = [], similarity_score = 100, similarity_verdict = "perfect"
-- similarity_verdict: "perfect" (90-100), "acceptable" (70-89), "deficient" (50-69), "critical" (0-49)
-- category_summary.max_impact es null si issues = 0 para esa categoría
-
-CRITICAL: Be HARSH and REALISTIC. If you see a mess (screens off, cables everywhere, trash), the score MUST be very low (20-40). Do NOT be lenient."""
+Si todo está correcto según las instrucciones del cliente, responde con differences = []"""
 
     return prompt
 
@@ -257,8 +177,8 @@ def load_guidelines(client_id: str) -> list[dict]:
         if file_path.is_file():
             ext = file_path.suffix.lower()
 
-            # Skip kpis.json configuration file
-            if file_path.name == "kpis.json":
+            # Skip configuration files
+            if file_path.name in ("kpis.json", "guidelines.md"):
                 continue
 
             if ext in supported_images:
@@ -307,22 +227,22 @@ async def analyze_storefront(
     client_id: str
 ) -> dict:
     """
-    Analyze a storefront image using Claude Vision.
+    Analyze a storefront image using Claude Vision with generic KPIs.
 
     Args:
         image_path: Path to the uploaded storefront image
         store_id: Identifier for the store
-        client_id: Identifier for the client (determines which KPIs and guidelines to use)
+        client_id: Identifier for the client (determines which guidelines to use)
 
     Returns:
         Analysis result with KPIs and token usage
     """
-    # Load client KPIs configuration
-    kpis_config = load_client_kpis(client_id)
+    # Load generic KPIs configuration (same for all clients in MVP)
+    kpis_config = load_generic_kpis()
     analysis_prompt = build_dynamic_prompt(kpis_config)
 
-    logger.info(f"[{store_id}] Using client: {client_id} ({kpis_config.get('client_name', 'Unknown')})")
-    logger.info(f"[{store_id}] KPIs to evaluate: {len(kpis_config.get('kpis', []))}")
+    logger.info(f"[{store_id}] Client: {client_id} | Using generic KPIs")
+    logger.info(f"[{store_id}] KPI categories: {len(kpis_config.get('kpis', []))}")
 
     client = anthropic.Anthropic()
 
@@ -332,22 +252,34 @@ async def analyze_storefront(
     # Build the message content
     content = []
 
-    # Add guidelines first (if any)
+    # Load text guidelines first (these are the written instructions)
+    text_guidelines = load_text_guidelines(client_id)
+    if text_guidelines:
+        content.append({
+            "type": "text",
+            "text": f"## INSTRUCCIONES ESPECÍFICAS DEL CLIENTE:\n\n{text_guidelines}\n\n---\n"
+        })
+        logger.info(f"[{store_id}] Loaded text guidelines for client {client_id}")
+        logger.info(f"[{store_id}] Guidelines content:\n{text_guidelines}")
+    else:
+        logger.warning(f"[{store_id}] NO text guidelines found for client {client_id}")
+
+    # Load visual guidelines from client folder
     guidelines = load_guidelines(client_id)
     if guidelines:
         content.append({
             "type": "text",
-            "text": f"## Guidelines de referencia para {kpis_config.get('client_name', 'el escaparate')}:\n"
+            "text": "## PLANOGRAMA/GUIDELINE VISUAL DE REFERENCIA:\n"
         })
         content.extend(guidelines)
         content.append({
             "type": "text",
-            "text": "\n---\n\n## Imagen del escaparate a analizar (Store ID: " + store_id + "):\n"
+            "text": "\n---\n\n## IMAGEN DEL ESCAPARATE A EVALUAR (Store ID: " + store_id + "):\n"
         })
     else:
         content.append({
             "type": "text",
-            "text": f"## Imagen del escaparate a analizar (Store ID: {store_id}):\n\nNota: No hay guidelines de referencia disponibles para {kpis_config.get('client_name', 'este cliente')}. Evalúa basándote en las descripciones de los KPIs.\n"
+            "text": f"## Imagen del escaparate a analizar (Store ID: {store_id}):\n\n⚠️ NOTA: No se ha encontrado planograma de referencia para este cliente. Evalúa la imagen aplicando criterios generales de Visual Merchandising.\n"
         })
 
     # Add the storefront image to analyze

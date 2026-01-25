@@ -1,0 +1,62 @@
+{
+  "version": "1.0",
+  "description": "KPIs genéricos para categorizar el feedback en evaluaciones de Visual Merchandising",
+  "principle": "El planograma/guideline de referencia es la VERDAD ABSOLUTA. El escaparate debe ser IDÉNTICO al planograma.",
+  "kpis": [
+    {
+      "id": "planograma",
+      "name": "Cumplimiento de planograma",
+      "description": "Disposición física de productos comparada con el planograma",
+      "what_to_check": [
+        "Posición de cada producto en el espacio asignado",
+        "Cantidad de unidades visibles por producto",
+        "Agrupación correcta de productos",
+        "Orientación de productos (frontal, lateral)",
+        "Espacios vacíos intencionales respetados"
+      ]
+    },
+    {
+      "id": "visibilidad",
+      "name": "Visibilidad de productos",
+      "description": "Accesibilidad visual de los productos para el cliente",
+      "what_to_check": [
+        "Productos sin obstrucciones",
+        "Etiquetas y packaging orientados correctamente",
+        "Productos no escondidos, girados o caídos",
+        "Densidad visual según planograma"
+      ]
+    },
+    {
+      "id": "carteleria",
+      "name": "Cartelería y precios",
+      "description": "Material de comunicación visual y precios",
+      "what_to_check": [
+        "Presencia de carteles indicados en el planograma",
+        "Ubicación correcta de cada elemento",
+        "Precios visibles y asociados correctamente",
+        "Material en buen estado"
+      ]
+    },
+    {
+      "id": "limpieza",
+      "name": "Limpieza y orden",
+      "description": "Estado general y ausencia de elementos ajenos",
+      "what_to_check": [
+        "Ausencia de suciedad visible",
+        "Sin objetos ajenos al planograma",
+        "Productos alineados correctamente",
+        "Sin huecos no intencionales"
+      ]
+    },
+    {
+      "id": "iluminacion",
+      "name": "Iluminación",
+      "description": "Estado de la iluminación comparado con el planograma",
+      "what_to_check": [
+        "Puntos de luz funcionando según planograma",
+        "Iluminación uniforme o focalizada según se requiera",
+        "Pantallas/displays en el estado indicado"
+      ]
+    }
+  ]
+}
