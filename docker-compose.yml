@@ -1,0 +1,13 @@
+services:
+  storefront-analyzer:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - uploads-data:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  uploads-data:
