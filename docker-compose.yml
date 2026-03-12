@@ -1,13 +1,14 @@
 services:
   storefront-analyzer:
-    build: .
+    image: iaanalyzer
+    container_name: iaanalyzer
     ports:
-      - "8000:8000"
+      - "9019:8000"
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - DATABASE_PATH=/data/storefront_analyzer.db
     volumes:
-      - uploads-data:/app/uploads
+      - ./volumes/uploads:/app/uploads
+      - ./volumes/data:/data
+      - ./reference_guidelines:/app/reference_guidelines
     restart: unless-stopped
-
-volumes:
-  uploads-data:

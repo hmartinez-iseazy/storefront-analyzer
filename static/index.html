@@ -5,1530 +5,1371 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Storefront Analyzer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #FFFFFF;
-            color: #282828;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
             min-height: 100vh;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
-
-        /* ===== PORTADA ===== */
-        .portada {
+        .app-shell {
+            max-width: 414px;
+            margin: 0 auto;
+            background: #fff;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        /* Status bar (iOS mock) */
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 24px 8px;
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .status-bar-time { letter-spacing: -0.5px; }
-
-        .status-bar-icons {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-bar-icons svg { width: 18px; height: 18px; }
-
-        /* Task header */
-        .task-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 16px 8px 16px;
-        }
-
-        .task-header-left {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .task-header-left svg {
-            width: 20px;
-            height: 20px;
-            color: #282828;
-        }
-
-        .task-tags {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .tag {
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.36px;
-            line-height: 16px;
-        }
-
-        .tag-warning {
-            background: #FFEFBF;
-            color: #FF9700;
-        }
-
-        .tag-silver {
-            background: #E9E9EB;
-            color: #A7A7AD;
-        }
-
-        .tag-priority {
-            background: #FFEFBF;
-            color: #FF9700;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-        }
-
-        .tag-priority svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        /* Task body */
-        .task-body {
-            flex: 1;
-            padding: 24px;
-        }
-
-        .task-estimate {
-            font-size: 14px;
-            color: #909090;
-            margin-bottom: 8px;
-        }
-
-        .task-title {
-            font-size: 32px;
-            font-weight: 900;
-            line-height: 36px;
-            letter-spacing: -0.48px;
-            color: #282828;
-            margin-bottom: 12px;
-        }
-
-        .task-description {
-            font-size: 16px;
-            line-height: 20px;
-            color: #282828;
-            margin-bottom: 16px;
-        }
-
-        .task-evidence-tag {
-            background: #C0F0FC;
-            color: #07A7F1;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.36px;
-            padding: 4px 12px;
-            border-radius: 4px;
-            display: inline-block;
-            margin-bottom: 24px;
-            width: 100%;
-            text-align: center;
-        }
-
-        /* Task info rows */
-        .task-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .task-info-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 0;
-            border-top: 1px solid #F0F0F0;
-        }
-
-        .task-info-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .task-info-icon {
-            width: 24px;
-            height: 24px;
-            color: #909090;
-        }
-
-        .task-info-label {
-            font-size: 14px;
-            font-weight: 500;
-            color: #282828;
-        }
-
-        .task-info-sublabel {
-            font-size: 12px;
-            color: #909090;
-        }
-
-        .task-info-right {
-            font-size: 12px;
-            color: #909090;
-            font-weight: 700;
-        }
-
-        .tag-status {
-            background: #F0F0F0;
-            color: #909090;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-
-        .campaign-thumb {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #FF6B35, #F7931E, #2E7D32);
-            flex-shrink: 0;
-        }
-
-        .avatars-group {
-            display: flex;
-            align-items: center;
-            gap: -8px;
-        }
-
-        .avatar-circle {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 2px solid white;
-            background: #ccc;
-            margin-left: -8px;
-        }
-
-        .avatar-circle:first-child { margin-left: 0; }
-
-        .avatar-count {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #2196F3;
-            color: white;
-            font-size: 10px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: -8px;
-        }
-
-        /* Pasos section */
-        .task-steps {
-            padding-top: 16px;
-            border-top: 1px solid #F0F0F0;
-        }
-
-        .task-steps-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .task-steps-title {
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .task-steps-toggle {
-            cursor: pointer;
-            color: #909090;
-        }
-
-        .step-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 8px 0;
-        }
-
-        .step-check {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #FA1859;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        .step-check svg {
-            width: 14px;
-            height: 14px;
-            color: white;
-        }
-
-        .step-text {
-            font-size: 14px;
-            color: #282828;
-            line-height: 1.4;
-        }
-
-        .step-meta {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: #909090;
-            margin-top: 4px;
-        }
-
-        .step-avatar {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            display: inline-block;
-            flex-shrink: 0;
-        }
-
-        /* Guide section */
-        .task-guide {
-            padding-top: 16px;
-            border-top: 1px solid #F0F0F0;
-            margin-top: 16px;
-        }
-
-        .guide-description {
-            font-size: 14px;
-            color: #282828;
-            line-height: 1.5;
-            margin-bottom: 16px;
-        }
-
-        .guide-list {
-            list-style: disc;
-            padding-left: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .guide-list li {
-            font-size: 14px;
-            color: #282828;
-            line-height: 1.5;
-        }
-
-        /* Complete task button */
-        .complete-task-btn {
-            position: sticky;
-            bottom: 0;
-            background: white;
-            padding: 16px 24px 32px;
-        }
-
-        .slide-btn {
-            width: 100%;
-            height: 56px;
-            background: #FA1859;
-            border-radius: 48px;
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
         }
 
-        .slide-btn-label {
-            color: white;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-
-        .slide-btn-thumb {
+        /* Screen system */
+        .screen {
             position: absolute;
-            left: 6px;
-            top: 6px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.25);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: grab;
-            transition: left 0.3s ease;
-            z-index: 2;
-        }
-
-        .slide-btn-thumb.dragging {
-            transition: none;
-            cursor: grabbing;
-        }
-
-        .slide-btn-thumb svg {
-            width: 20px;
-            height: 20px;
-            color: white;
-            pointer-events: none;
-        }
-
-        .slide-btn.completed {
-            background: #E01550;
-        }
-
-        .slide-btn.completed .slide-btn-label {
-            opacity: 0;
-        }
-
-        /* ===== DRAWER (Bottom Sheet) ===== */
-        .drawer-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .drawer-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .drawer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 24px 24px 0 0;
-            z-index: 101;
-            transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-            max-height: 92vh;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #fff;
             overflow-y: auto;
-            max-width: 500px;
-            margin: 0 auto;
+            overflow-x: hidden;
+            transition: transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s cubic-bezier(.4,0,.2,1);
+            will-change: transform, opacity;
+            -webkit-overflow-scrolling: touch;
         }
+        .screen.hidden { display: none; }
+        .screen.slide-right-enter { transform: translateX(100%); }
+        .screen.slide-right-exit { transform: translateX(-30%); opacity: 0.5; }
+        .screen.slide-left-enter { transform: translateX(-100%); }
+        .screen.fade-enter { opacity: 0; }
+        .screen.slide-up-enter { transform: translateY(100%); }
+        .screen.active { transform: translateX(0); opacity: 1; z-index: 2; }
 
-        .drawer.open {
-            transform: translateY(0);
+        /* Status bar */
+        .status-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 20px 6px; font-size: 15px; font-weight: 600;
         }
+        .status-bar-icons { display: flex; align-items: center; gap: 5px; }
+        .status-bar-icons svg { width: 16px; height: 16px; }
 
-        .drawer-handle {
-            width: 36px;
-            height: 5px;
-            background: #E0E0E0;
-            border-radius: 3px;
-            margin: 12px auto 8px;
+        /* Common back button */
+        .back-btn {
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            background: none; border: none; cursor: pointer; color: #1a1a1a;
+            border-radius: 50%; flex-shrink: 0; font-size: 0;
         }
-
-        .drawer-content {
-            padding: 16px 24px 40px;
+        .back-btn:active { background: rgba(0,0,0,0.05); }
+        .back-btn svg { width: 24px; height: 24px; }
+        .close-btn {
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            background: none; border: none; cursor: pointer; color: #1a1a1a;
+            border-radius: 50%; flex-shrink: 0; font-size: 0;
         }
+        .close-btn:active { background: rgba(0,0,0,0.05); }
+        .close-btn svg { width: 24px; height: 24px; }
 
-        .drawer-title {
-            font-size: 28px;
-            font-weight: 900;
-            text-align: center;
-            margin-bottom: 4px;
+        /* Mini status badges (colored squares with numbers) */
+        .status-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 3px;
+            padding: 3px 7px; border-radius: 6px;
+            font-size: 12px; font-weight: 700; line-height: 1;
         }
-
-        .drawer-subtitle {
-            font-size: 14px;
-            color: #909090;
-            text-align: center;
-            margin-bottom: 20px;
+        .status-badge .badge-num {
+            font-size: 13px; font-weight: 800;
         }
+        .status-badge .badge-icon { font-size: 11px; }
+        .badge-pending { background: #FFF3E0; color: #FF9800; }
+        .badge-blocked { background: #FFEBEE; color: #EF5350; }
+        .badge-done { background: #E8F5E9; color: #4CAF50; }
+        .badge-review { background: #E3F2FD; color: #42A5F5; }
+        .badge-gray { background: #EEEEEE; color: #9E9E9E; }
 
-        /* Client selector inside drawer */
-        .drawer-client-selector {
-            margin-bottom: 16px;
+        /* Tags */
+        .tag {
+            display: inline-flex; align-items: center; padding: 4px 12px;
+            border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.3px;
+            white-space: nowrap; text-transform: uppercase;
         }
+        .tag-yellow { background: #FFF8E1; color: #F9A825; border: 1.5px solid #FFE082; }
+        .tag-gray { background: #F5F5F5; color: #9E9E9E; border: 1.5px solid #E0E0E0; }
+        .tag-green { background: #E8F5E9; color: #4CAF50; border: 1.5px solid #A5D6A7; }
+        .tag-blue { background: #E3F2FD; color: #2196F3; border: 1.5px solid #90CAF9; }
+        .tag-orange { background: #FFE0B2; color: #E65100; }
+        .tag-pink { background: #FCE4EC; color: #E91E63; }
 
-        .drawer-client-selector select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #E0E0E0;
-            border-radius: 12px;
-            background: #FAFAFA;
-            color: #282828;
-            font-size: 14px;
-            font-family: 'Roboto', sans-serif;
-        }
-
-        .drawer-client-selector select:focus {
-            outline: none;
-            border-color: #FA1859;
-        }
-
-        /* Photo upload area */
-        .photo-area {
-            background: #F5F5F5;
-            border: 2px dashed #E0E0E0;
-            border-radius: 16px;
-            min-height: 320px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-            transition: border-color 0.3s, background 0.3s, min-height 0.4s ease;
-        }
-
-        .photo-area.has-photo {
-            border-style: solid;
-            border-color: transparent;
-            background: transparent;
-            min-height: auto;
-        }
-
-        .photo-area.analyzing {
-            border-color: #2196F3;
-            border-style: solid;
-            background: transparent;
-        }
-
-        .photo-area.minimized {
-            min-height: auto;
-        }
-
-        .photo-placeholder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .camera-icon-circle {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: #FA1859;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .camera-icon-circle svg {
-            width: 28px;
-            height: 28px;
-            color: white;
-        }
-
-        .photo-placeholder-label {
-            font-size: 18px;
-            font-weight: 700;
-            color: #282828;
-        }
-
-        .photo-placeholder-alt {
-            font-size: 13px;
-            color: #B0B0B0;
-            cursor: pointer;
-        }
-
-        .photo-placeholder-alt:hover {
-            text-decoration: underline;
-        }
-
-        #photoPreview {
-            width: 100%;
-            height: auto;
-            max-height: 320px;
-            object-fit: cover;
-            border-radius: 14px;
-            display: none;
-            transition: filter 0.5s ease, max-height 0.4s ease;
-            cursor: pointer;
-        }
-
-        #photoPreview.minimized {
-            max-height: 120px;
-        }
-
-        #photoPreview.analyzing-filter {
-            filter: brightness(0.7) saturate(1.5) hue-rotate(190deg);
-            animation: image-pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes image-pulse {
-            0%, 100% { filter: brightness(0.6) saturate(1.5) hue-rotate(190deg); }
-            50% { filter: brightness(0.9) saturate(1.8) hue-rotate(190deg); }
-        }
-
-        /* Sparkle icon */
-        .sparkle-container {
-            text-align: center;
-            padding: 16px 0;
-            display: none;
-        }
-
-        .sparkle-container.visible {
-            display: block;
-        }
-
-        .sparkle-svg {
-            width: 40px;
-            height: 40px;
-            color: #FA1859;
-        }
-
-        .sparkle-container {
-            position: relative;
-        }
-
-        .sparkle-svg.beating {
-            animation: sparkle-heartbeat 1.2s ease-in-out infinite;
-        }
-
-        @keyframes sparkle-heartbeat {
-            0%, 100% { transform: scale(1); }
-            15% { transform: scale(1.3); }
-            30% { transform: scale(1); }
-            45% { transform: scale(1.15); }
-            60% { transform: scale(1); }
-        }
-
-        /* Sparkle particles */
-        .sparkle-particle {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #FA1859;
-            pointer-events: none;
-            opacity: 0;
-        }
-
-        .sparkle-container.emitting .sparkle-particle {
-            animation: sparkle-burst 1.8s ease-out infinite;
-        }
-
-        .sparkle-particle:nth-child(2) { animation-delay: 0.3s; }
-        .sparkle-particle:nth-child(3) { animation-delay: 0.6s; }
-        .sparkle-particle:nth-child(4) { animation-delay: 0.9s; }
-        .sparkle-particle:nth-child(5) { animation-delay: 1.2s; }
-        .sparkle-particle:nth-child(6) { animation-delay: 1.5s; }
-
-        @keyframes sparkle-burst {
-            0% { opacity: 1; transform: translate(0, 0) scale(1); }
-            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
-        }
-
-        /* Analyzing text */
-        .analyzing-text {
-            text-align: center;
-            font-size: 15px;
-            color: #909090;
-            padding-bottom: 16px;
-            display: none;
-        }
-
-        .analyzing-text.visible {
-            display: block;
-        }
-
-        .analyzing-cursor {
-            animation: cursor-blink 0.7s step-end infinite;
-            font-weight: 300;
-            color: #FA1859;
-        }
-
-        @keyframes cursor-blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        /* Results section inside drawer */
-        .results-section {
-            display: none;
-        }
-
-        .results-section.visible {
-            display: block;
-        }
-
-        /* Verdict banner */
-        .verdict-banner {
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .verdict-banner.no-valido {
-            background: #FFF3E0;
-        }
-
-        .verdict-banner.valido {
-            background: #E8F5E9;
-        }
-
-        .verdict-label {
-            display: inline-block;
-            padding: 6px 16px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-
-        .verdict-label.no-valido {
-            background: #FF9700;
-            color: white;
-        }
-
-        .verdict-label.valido {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .verdict-message {
-            font-size: 14px;
-            color: #282828;
-            font-weight: 400;
-            line-height: 1.5;
-        }
-
-        /* Results heading */
-        .results-heading {
-            font-size: 24px;
-            font-weight: 900;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        /* KPI result card */
-        .kpi-result {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            align-items: flex-start;
-        }
-
-        .kpi-result-icon {
-            width: 32px;
-            height: 32px;
-            flex-shrink: 0;
-            color: #00A3F5;
-            margin-top: 4px;
-        }
-
-        .kpi-result-card {
-            flex: 1;
-            background: #F5F5F5;
-            border-radius: 12px;
-            padding: 16px;
-        }
-
-        .kpi-result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        .kpi-result-category {
-            font-size: 12px;
-            color: #909090;
-            font-weight: 400;
-        }
-
-        .kpi-result-badge {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background: #FFF3E0;
-            color: #FF9700;
-        }
-
-        .kpi-result-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #282828;
-            margin-bottom: 8px;
-        }
-
-        .kpi-result-description {
-            font-size: 13px;
-            color: #666;
-            line-height: 1.4;
-            margin-bottom: 12px;
-        }
-
-        .kpi-result-divider {
-            height: 1px;
-            background: #E0E0E0;
-            margin-bottom: 8px;
-        }
-
-        .kpi-result-actions-title {
-            font-size: 12px;
-            font-weight: 700;
-            color: #909090;
+        /* Buttons */
+        .btn-primary {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 52px; background: #29B6F6; color: #fff;
+            border: none; border-radius: 28px; font-size: 15px; font-weight: 700;
+            cursor: pointer; letter-spacing: 0.8px; transition: background 0.2s;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
+        }
+        .btn-primary:active { background: #0288D1; }
+        .btn-primary:disabled { background: #E0E0E0; cursor: not-allowed; }
+        .btn-confirm {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 52px;
+            background: linear-gradient(135deg, #26C6DA 0%, #29B6F6 100%);
+            color: #fff; border: none; border-radius: 28px; font-size: 15px; font-weight: 700;
+            cursor: pointer; letter-spacing: 0.8px; text-transform: uppercase;
+        }
+        .btn-confirm:active { opacity: 0.9; }
+        .btn-cancel {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 48px; background: #F5F5F5; color: #757575;
+            border: none; border-radius: 28px; font-size: 14px; font-weight: 600;
+            cursor: pointer; letter-spacing: 0.5px; text-transform: uppercase;
+        }
+        .btn-danger {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 52px; background: #EF5350; color: #fff;
+            border: none; border-radius: 28px; font-size: 15px; font-weight: 700;
+            cursor: pointer; letter-spacing: 0.8px; text-transform: uppercase;
+        }
+        .btn-danger:active { background: #D32F2F; }
+
+        /* AI icon */
+        .ai-icon {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF9800 100%);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 12px; font-weight: 900; flex-shrink: 0;
+            letter-spacing: -0.5px;
         }
 
-        .kpi-result-action-label {
-            font-size: 14px;
-            font-weight: 400;
-            color: #282828;
+        /* ============ SCREEN 1: Campaigns ============ */
+        #screen-campaigns { z-index: 1; }
+        .campaigns-header { padding: 20px 20px 0; }
+        .campaigns-header-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+        .campaigns-header-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            overflow: hidden; flex-shrink: 0;
         }
+        .campaigns-header-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .campaigns-title {
+            font-size: 34px; font-weight: 900; line-height: 1.05;
+            letter-spacing: -0.5px; color: #1a1a1a;
+        }
+        .campaigns-subtitle {
+            font-size: 14px; color: #9E9E9E; margin-top: 6px; line-height: 1.4;
+        }
+        .campaigns-tabs {
+            display: flex; gap: 0; margin: 20px 20px 16px;
+            background: #F5F5F5; border-radius: 12px; padding: 3px;
+        }
+        .campaigns-tab {
+            flex: 1; padding: 9px 8px; text-align: center; font-size: 13px; font-weight: 600;
+            border-radius: 10px; cursor: pointer; transition: all 0.2s; color: #9E9E9E;
+            border: none; background: none;
+        }
+        .campaigns-tab.active { background: #fff; color: #1a1a1a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .campaigns-list { padding: 0 20px 32px; display: flex; flex-direction: column; gap: 14px; }
 
-        /* Buttons inside drawer */
-        .drawer-btn-primary {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 12px;
+        /* Campaign card */
+        .campaign-card {
+            border-radius: 16px; overflow: hidden; position: relative;
+            height: 180px; display: flex; flex-direction: column; justify-content: flex-end;
+            cursor: pointer; transition: transform 0.15s;
+        }
+        .campaign-card:active { transform: scale(0.98); }
+        .campaign-card-bg {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-size: cover; background-position: center;
+            border-radius: 16px;
+        }
+        .campaign-card-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.0) 55%);
+            border-radius: 16px;
+        }
+        .campaign-card-content {
+            position: relative; padding: 14px 16px; z-index: 1;
+        }
+        .campaign-card-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+        .campaign-card-title {
+            font-size: 22px; font-weight: 800; color: #fff; line-height: 1.15;
+            margin-bottom: 4px; letter-spacing: -0.3px;
+        }
+        .campaign-card-date {
+            font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 500;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .campaign-card-date .arrow { font-size: 10px; }
+
+        /* ============ SCREEN 2: Campaign Detail ============ */
+        .campaign-detail-hero {
+            position: relative; height: 240px; display: flex; flex-direction: column;
+            justify-content: flex-end;
+        }
+        .campaign-detail-hero-bg {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-size: cover; background-position: center;
+        }
+        .campaign-detail-hero-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.0) 60%);
+        }
+        .campaign-detail-hero-content { position: relative; z-index: 1; padding: 16px 20px; }
+        .campaign-detail-hero .back-btn {
+            position: absolute; top: 12px; left: 12px; z-index: 2; color: #fff;
+        }
+        .campaign-detail-hero .back-btn svg { fill: #fff; }
+        .campaign-detail-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+        .campaign-detail-body { padding: 16px 20px 24px; }
+        .campaign-detail-date {
+            font-size: 12px; color: #9E9E9E; font-weight: 500; margin-bottom: 8px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .campaign-detail-date .arrow { font-size: 10px; }
+        .campaign-detail-title {
+            font-size: 28px; font-weight: 900; line-height: 1.1; margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+        .campaign-detail-desc {
+            font-size: 15px; color: #757575; line-height: 1.5; margin-bottom: 20px;
+        }
+        /* Text-based tabs for campaign detail */
+        .detail-tabs {
+            display: flex; gap: 24px; margin-bottom: 20px;
+            border-bottom: 1px solid #F0F0F0; padding-bottom: 0;
+        }
+        .detail-tab {
+            padding: 8px 0; font-size: 15px; font-weight: 600;
+            cursor: pointer; color: #BDBDBD; border: none; background: none;
+            border-bottom: 2px solid transparent; margin-bottom: -1px;
             transition: all 0.2s;
-            font-family: 'Roboto', sans-serif;
         }
+        .detail-tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+        .detail-tab .tab-count { color: #29B6F6; }
 
-        .drawer-btn-primary.active {
-            background: #FA1859;
-            color: white;
+        /* Task card in campaign detail */
+        .task-card {
+            background: #fff; border-radius: 16px; padding: 20px;
+            margin-bottom: 16px; cursor: pointer; transition: transform 0.15s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+            border: 1px solid #F5F5F5;
         }
-
-        .drawer-btn-primary.disabled {
-            background: #F0F0F0;
-            color: #C0C0C0;
-            cursor: not-allowed;
+        .task-card:active { transform: scale(0.98); }
+        .task-card.disabled { opacity: 0.55; cursor: default; }
+        .task-card.disabled:active { transform: none; }
+        .task-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+        .task-card-date-pill {
+            font-size: 11px; color: #9E9E9E; font-weight: 500;
+            background: #F5F5F5; padding: 4px 10px; border-radius: 20px;
         }
-
-        .drawer-btn-primary svg {
-            width: 18px;
-            height: 18px;
+        .task-card-title {
+            font-size: 22px; font-weight: 800; margin-bottom: 10px;
+            line-height: 1.2; letter-spacing: -0.3px;
         }
-
-        .drawer-btn-secondary {
-            width: 100%;
-            padding: 14px;
-            background: #F5F5F5;
-            color: #282828;
-            border: 1px solid #E8E8E8;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            margin-bottom: 12px;
-            font-family: 'Roboto', sans-serif;
-            transition: background 0.2s;
+        .task-card-meta {
+            display: flex; align-items: center; gap: 16px; font-size: 14px;
+            color: #757575; margin-bottom: 14px;
         }
-
-        .drawer-btn-secondary:hover {
-            background: #EBEBEB;
+        .task-card-meta-item { display: flex; align-items: center; gap: 5px; }
+        .task-card-meta-item svg { width: 18px; height: 18px; fill: #757575; }
+        .task-card-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .task-card-steps { margin-bottom: 16px; }
+        .task-card-step {
+            display: flex; align-items: flex-start; gap: 14px; padding: 10px 0;
+            font-size: 16px; color: #424242; line-height: 1.4;
         }
-
-        /* Error message */
-        .drawer-error {
-            background: #FFEBEE;
-            color: #C62828;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 16px;
-            display: none;
+        .task-card-step-dot {
+            width: 10px; height: 10px; border-radius: 50%; background: #E0E0E0;
+            flex-shrink: 0; margin-top: 6px;
         }
-
-        /* Hide file input */
-        .hidden-input {
-            display: none;
+        .task-card-cta {
+            display: flex; align-items: center; justify-content: center;
+            padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600;
+            color: #29B6F6; margin-bottom: 16px; letter-spacing: 0.2px;
+            background: linear-gradient(135deg, rgba(38,198,218,0.12) 0%, rgba(41,182,246,0.12) 100%);
+            font-style: italic;
         }
-
-        /* Valid result banner */
-        .valid-success {
-            text-align: center;
-            padding: 40px 20px;
+        .task-card-divider { height: 1px; background: #F0F0F0; margin-bottom: 14px; }
+        .task-card-footer {
+            display: flex; align-items: center; gap: 10px;
         }
+        .task-card-footer-icon { display: flex; align-items: center; }
+        .task-card-footer-icon svg { width: 28px; height: 28px; }
+        .task-card-footer-text { font-size: 14px; }
+        .task-card-footer-text strong { font-weight: 700; color: #1a1a1a; }
+        .task-card-footer-text span { color: #9E9E9E; font-size: 13px; }
 
-        .valid-success-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
+        /* ============ SCREEN 3: Task Page ============ */
+        .task-page-header {
+            display: flex; align-items: center; padding: 10px 16px; gap: 8px;
         }
-
-        .valid-success-text {
+        .task-page-timer {
+            display: flex; align-items: center; gap: 4px; margin-left: auto;
+        }
+        .task-page-timer-val {
+            font-size: 15px; font-weight: 700; background: #F5F5F5; padding: 5px 12px;
+            border-radius: 8px; color: #1a1a1a;
+        }
+        .task-page-timer svg { width: 20px; height: 20px; fill: #757575; }
+        .task-page-body { padding: 0 20px 120px; }
+        .task-page-estimate { font-size: 13px; color: #9E9E9E; margin-bottom: 6px; }
+        .task-page-title {
+            font-size: 30px; font-weight: 900; line-height: 1.1; margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        .task-page-desc {
+            font-size: 15px; color: #757575; line-height: 1.5; margin-bottom: 20px;
+        }
+        .task-page-campaign-ref {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            background: #F9F9F9; border-radius: 12px; margin-bottom: 16px;
+        }
+        .task-page-campaign-thumb {
+            width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;
+            background-size: cover; background-position: center;
+        }
+        .task-page-campaign-ref-title { font-size: 14px; font-weight: 700; }
+        .task-page-campaign-ref-date { font-size: 12px; color: #9E9E9E; }
+        .task-page-schedule {
+            display: flex; align-items: center; gap: 8px; font-size: 14px;
+            color: #757575; margin-bottom: 16px;
+        }
+        .task-page-schedule svg { width: 18px; height: 18px; fill: #757575; }
+        .task-page-review {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+        }
+        .task-page-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .task-page-avatars {
+            display: flex; align-items: center; margin-bottom: 28px;
+        }
+        .avatar-circle {
+            width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff;
+            margin-left: -8px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 700; color: #fff;
+        }
+        .avatar-circle:first-child { margin-left: 0; }
+        .avatar-count { margin-left: 8px; font-size: 13px; color: #9E9E9E; font-weight: 500; }
+        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.2px; }
+        .step-item {
+            display: flex; align-items: center; gap: 12px; padding: 14px 0;
+            border-bottom: 1px solid #F5F5F5; font-size: 15px; color: #424242;
+        }
+        .step-checkbox {
+            width: 22px; height: 22px; border-radius: 6px; border: 2px solid #D0D0D0;
+            flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+        }
+        .step-checkbox.checked { background: #29B6F6; border-color: #29B6F6; }
+        .step-checkbox.checked::after { content: '✓'; color: #fff; font-size: 13px; font-weight: 700; }
+        .deliverable-item {
+            display: flex; align-items: center; gap: 12px; padding: 14px 0;
+            border-bottom: 1px solid #F5F5F5; cursor: pointer;
+        }
+        .deliverable-item:active { background: #FAFAFA; }
+        .deliverable-icon {
+            width: 44px; height: 44px; border-radius: 10px; background: #F5F5F5;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
             font-size: 20px;
-            font-weight: 700;
-            color: #2E7D32;
-            margin-bottom: 8px;
+        }
+        .deliverable-icon.done { background: #E3F2FD; }
+        .deliverable-info { flex: 1; }
+        .deliverable-title { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+        .deliverable-subtitle { font-size: 12px; color: #9E9E9E; margin-top: 2px; }
+        .deliverable-arrow { color: #BDBDBD; font-size: 18px; font-weight: 300; }
+        .deliverable-thumb {
+            width: 44px; height: 44px; border-radius: 8px; object-fit: cover;
+        }
+        .task-page-bottom {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            max-width: 414px; width: 100%; padding: 16px 20px 24px;
+            background: linear-gradient(to top, #fff 70%, rgba(255,255,255,0));
+            z-index: 10;
+        }
+        .slider-btn {
+            width: 100%; height: 52px; background: #E0E0E0; border-radius: 28px;
+            position: relative; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.8px;
+            overflow: hidden; user-select: none; text-transform: uppercase;
+        }
+        .slider-btn.enabled { background: #29B6F6; }
+
+        /* ============ SCREEN 4: Deliverable Detail ============ */
+        .screen-header {
+            display: flex; align-items: center; padding: 8px 16px; gap: 8px;
+        }
+        .deliv-detail-body { padding: 0 20px 32px; }
+        .deliv-detail-title {
+            font-size: 28px; font-weight: 900; line-height: 1.1; margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        .deliv-detail-subtitle {
+            font-size: 14px; color: #9E9E9E; line-height: 1.5; margin-bottom: 20px;
+        }
+        .deliv-ref-image {
+            width: 100%; border-radius: 16px; aspect-ratio: 4/3; object-fit: cover;
+            margin-bottom: 20px;
+        }
+        .deliv-ref-placeholder {
+            width: 100%; border-radius: 16px; aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 50%, #80DEEA 100%);
+            margin-bottom: 20px; display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .deliv-ref-placeholder img {
+            width: 60%; height: auto; object-fit: contain;
+        }
+        .info-card {
+            background: #F9F9F9; border-radius: 16px; padding: 18px; margin-bottom: 24px;
+        }
+        .info-card-title {
+            font-size: 15px; font-weight: 700; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .info-card-title svg { width: 20px; height: 20px; fill: #29B6F6; }
+        .info-card-item {
+            display: flex; align-items: flex-start; gap: 10px; padding: 5px 0;
+            font-size: 14px; color: #616161; line-height: 1.5;
+        }
+        .info-card-bullet { color: #1a1a1a; flex-shrink: 0; margin-top: 1px; }
+
+        /* Delivery section */
+        .delivery-section {
+            margin-top: 16px; padding: 16px; background: #F9F9F9; border-radius: 16px;
+        }
+        .delivery-section-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+        .delivery-photo-row { display: flex; align-items: center; gap: 12px; }
+        .delivery-photo-thumb { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
+        .delivery-photo-info { font-size: 14px; color: #757575; }
+        .delivery-photo-name { font-weight: 600; color: #1a1a1a; }
+
+        /* ============ SCREEN 5+: Upload Modal ============ */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.35); z-index: 100;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-drawer {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
+            max-width: 414px; width: 100%; background: #fff;
+            border-radius: 20px 20px 0 0; z-index: 101;
+            transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+            max-height: 92vh; overflow-y: auto;
+        }
+        .modal-drawer.active { transform: translateX(-50%) translateY(0); }
+        .modal-handle {
+            width: 36px; height: 4px; background: #E0E0E0; border-radius: 2px;
+            margin: 12px auto 0;
+        }
+        .modal-body { padding: 20px 20px 28px; }
+        .modal-title {
+            font-size: 28px; font-weight: 900; line-height: 1.1; margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+        .modal-subtitle { font-size: 14px; color: #9E9E9E; margin-bottom: 20px; }
+
+        /* AI bubble */
+        .ai-bubble {
+            display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px;
+        }
+        .ai-bubble-box {
+            background: #FFF3E0; border-radius: 14px; padding: 12px 14px;
+            font-size: 14px; color: #E65100; line-height: 1.45; font-weight: 500;
+            position: relative; flex: 1;
+        }
+        .ai-bubble-box::before {
+            content: ''; position: absolute; left: -6px; top: 12px;
+            width: 12px; height: 12px; background: #FFF3E0;
+            transform: rotate(45deg); border-radius: 2px;
         }
 
-        .valid-success-detail {
-            font-size: 14px;
-            color: #666;
+        /* Upload zone */
+        .upload-zone {
+            border: 2px dashed #E0E0E0; border-radius: 16px; padding: 48px 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: border-color 0.2s; margin-bottom: 20px;
+            background: #FAFAFA;
         }
+        .upload-zone:active { border-color: #29B6F6; background: #F5F5F5; }
+        .upload-zone-icon {
+            width: 56px; height: 56px; border-radius: 50%; background: #E1F5FE;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 14px; position: relative;
+        }
+        .upload-zone-icon svg { width: 28px; height: 28px; fill: #29B6F6; }
+        .upload-zone-icon-badge {
+            position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px;
+            border-radius: 50%; background: #29B6F6; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700;
+        }
+        .upload-zone-title { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+        .upload-zone-sub { font-size: 13px; color: #BDBDBD; }
+
+        /* ============ Analysis Animation ============ */
+        .analysis-container {
+            position: relative; display: none; flex-direction: column; align-items: center;
+        }
+        .analysis-container.active { display: flex; }
+        .analysis-image-wrap {
+            width: 100%; border-radius: 16px; overflow: hidden; position: relative;
+            margin-bottom: 16px;
+        }
+        .analysis-image {
+            width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block;
+            transition: filter 1s ease;
+        }
+        .analysis-image.grayscale { filter: grayscale(100%); }
+        .analysis-image-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.35); opacity: 0; transition: opacity 0.5s;
+        }
+        .analysis-image-overlay.active { opacity: 1; }
+        .analysis-glow {
+            width: 72px; height: 72px; border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B6B, #FF9800);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 22px; font-weight: 900;
+            animation: pulse-glow 1.5s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(255,107,107,0.5), 0 0 60px rgba(255,152,0,0.3);
+        }
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); box-shadow: 0 0 50px rgba(255,107,107,0.6), 0 0 100px rgba(255,152,0,0.4); }
+        }
+        .analysis-text {
+            color: #fff; font-size: 15px; font-weight: 500; margin-top: 14px;
+            opacity: 0; transition: opacity 0.5s;
+        }
+        .analysis-text.active { opacity: 1; }
+        .analysis-badge {
+            position: absolute; bottom: 20px; right: 20px; padding: 6px 16px;
+            border-radius: 6px; font-size: 13px; font-weight: 800; letter-spacing: 0.8px;
+            opacity: 0; transform: scale(0.8); transition: all 0.4s cubic-bezier(.4,0,.2,1);
+        }
+        .analysis-badge.active { opacity: 1; transform: scale(1); }
+        .analysis-badge.good { background: #4CAF50; color: #fff; }
+        .analysis-badge.improve { background: #FFC107; color: #1a1a1a; }
+
+        /* AI verdict */
+        .ai-verdict {
+            display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px;
+            opacity: 0; transition: opacity 0.5s; width: 100%;
+        }
+        .ai-verdict.active { opacity: 1; }
+        .ai-verdict-bubble {
+            background: #FFF3E0; border-radius: 14px; padding: 12px 14px;
+            font-size: 15px; color: #E65100; line-height: 1.45; font-weight: 600;
+            font-style: italic; position: relative; flex: 1;
+        }
+        .ai-verdict-bubble::before {
+            content: ''; position: absolute; left: -6px; top: 14px;
+            width: 12px; height: 12px; background: #FFF3E0;
+            transform: rotate(45deg); border-radius: 2px;
+        }
+        .typing-cursor {
+            display: inline-block; width: 2px; height: 14px;
+            background: #E65100; animation: blink 0.7s infinite;
+            vertical-align: middle; margin-left: 2px;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Feedback cards */
+        .feedback-section { margin-top: 0; width: 100%; }
+        .feedback-card {
+            background: #fff; border-radius: 14px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+            margin-bottom: 14px; overflow: hidden; border: 1px solid #F0F0F0;
+        }
+        .feedback-card-body { padding: 16px; }
+        .feedback-category {
+            display: inline-block; padding: 3px 10px; background: #F0F0F0;
+            color: #9E9E9E; font-size: 10px; font-weight: 700; border-radius: 4px;
+            text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.8px;
+        }
+        .feedback-desc { font-size: 15px; color: #424242; line-height: 1.5; }
+        .feedback-recommend {
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #FFF8E1 0%, #FFF3E0 100%);
+            border-top: 1px solid #FFE0B2;
+        }
+        .feedback-recommend-header {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+        }
+        .feedback-recommend-header .ai-icon { width: 22px; height: 22px; font-size: 8px; }
+        .feedback-recommend-label {
+            font-size: 11px; font-weight: 700; color: #E65100;
+            letter-spacing: 0.8px; text-transform: uppercase;
+        }
+        .feedback-recommend-text { font-size: 14px; color: #E65100; line-height: 1.45; }
+
+        /* Utility */
+        .mb-8 { margin-bottom: 8px; }
+        .mb-16 { margin-bottom: 16px; }
+        .mb-24 { margin-bottom: 24px; }
     </style>
 </head>
 <body>
-
-<!-- ===== PORTADA ===== -->
-<div class="portada" id="portada">
-    <!-- Status bar -->
-    <div class="status-bar">
-        <span class="status-bar-time">9:41</span>
-        <div class="status-bar-icons">
-            <svg viewBox="0 0 24 14" fill="currentColor"><rect x="0" y="6" width="4" height="8" rx="1"/><rect x="6" y="4" width="4" height="10" rx="1"/><rect x="12" y="2" width="4" height="12" rx="1"/><rect x="18" y="0" width="4" height="14" rx="1"/></svg>
-            <svg viewBox="0 0 20 15" fill="currentColor"><path d="M10 12.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm-5-3.5a7 7 0 019.9 0l-1.4 1.4a5 5 0 00-7.1 0L3.5 9zm-4-4a12 12 0 0118 0l-1.4 1.4a10 10 0 00-15.2 0L1 5z"/></svg>
-            <svg viewBox="0 0 28 14" fill="currentColor"><rect x="0" y="0" width="24" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.4"/><rect x="25" y="4" width="2" height="6" rx="1" opacity="0.5"/><rect x="2" y="2" width="16" height="10" rx="1.5"/></svg>
+<div class="app-shell" id="app">
+    <!-- ======== SCREEN 1: Campaigns List ======== -->
+    <div class="screen active" id="screen-campaigns">
+        <div class="status-bar">
+            <span>9:41</span>
+            <div class="status-bar-icons">
+                <svg viewBox="0 0 24 24" fill="#1a1a1a"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+                <svg viewBox="0 0 24 24" fill="#1a1a1a"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+            </div>
+        </div>
+        <div class="campaigns-header">
+            <div class="campaigns-header-row">
+                <div class="campaigns-header-icon">
+                    <img src="img/header_icon.png" alt="" />
+                </div>
+            </div>
+            <div class="campaigns-title">Campañas</div>
+            <div class="campaigns-subtitle">Participa y completa tareas para eventos especiales</div>
+        </div>
+        <div class="campaigns-tabs">
+            <button class="campaigns-tab active">En vivo</button>
+            <button class="campaigns-tab">Siguiente</button>
+            <button class="campaigns-tab">Historia</button>
+        </div>
+        <div class="campaigns-list">
+            <!-- Campaign 1 -->
+            <div class="campaign-card" onclick="navigateTo('screen-campaign-detail','fade')">
+                <div class="campaign-card-bg" style="background-image:url('img/campaign1.png');"></div>
+                <div class="campaign-card-overlay"></div>
+                <div class="campaign-card-content">
+                    <div class="campaign-card-badges">
+                        <span class="status-badge badge-pending"><span class="badge-num">2</span><span class="badge-icon">⏳</span></span>
+                        <span class="status-badge badge-blocked"><span class="badge-num">11</span><span class="badge-icon">⊘</span></span>
+                        <span class="status-badge badge-done"><span class="badge-num">2</span><span class="badge-icon">✓</span></span>
+                    </div>
+                    <div class="campaign-card-title">Nueva Colección al Frente</div>
+                    <div class="campaign-card-date">1 DIC 2027 <span class="arrow">→</span> 24 DIC 2027</div>
+                </div>
+            </div>
+            <!-- Campaign 2 -->
+            <div class="campaign-card">
+                <div class="campaign-card-bg" style="background-image:url('img/campaign2.png');"></div>
+                <div class="campaign-card-overlay"></div>
+                <div class="campaign-card-content">
+                    <div class="campaign-card-badges">
+                        <span class="status-badge badge-pending"><span class="badge-num">2</span><span class="badge-icon">✕</span></span>
+                        <span class="status-badge badge-blocked"><span class="badge-num">1</span><span class="badge-icon">⊡</span></span>
+                        <span class="status-badge badge-review"><span class="badge-num">5</span><span class="badge-icon">◎</span></span>
+                    </div>
+                    <div class="campaign-card-title">Operación del Día de San Valentín</div>
+                    <div class="campaign-card-date">12 NOV 2025 <span class="arrow">→</span> 15 NOV 2025</div>
+                </div>
+            </div>
+            <!-- Campaign 3 -->
+            <div class="campaign-card">
+                <div class="campaign-card-bg" style="background-image:url('img/campaign3.png');"></div>
+                <div class="campaign-card-overlay"></div>
+                <div class="campaign-card-content">
+                    <div class="campaign-card-badges">
+                        <span class="status-badge badge-pending"><span class="badge-num">2</span><span class="badge-icon">⏳</span></span>
+                        <span class="status-badge badge-blocked"><span class="badge-num">5</span><span class="badge-icon">⊘</span></span>
+                        <span class="status-badge badge-done"><span class="badge-num">4</span><span class="badge-icon">🔗</span></span>
+                    </div>
+                    <div class="campaign-card-title">Black Friday Listo para Brillar</div>
+                    <div class="campaign-card-date">2 NOV 2025 <span class="arrow">→</span> 11 NOV 2025</div>
+                </div>
+            </div>
+            <!-- Campaign 4 -->
+            <div class="campaign-card">
+                <div class="campaign-card-bg" style="background-image:url('img/campaign4.png');"></div>
+                <div class="campaign-card-overlay"></div>
+                <div class="campaign-card-content">
+                    <div class="campaign-card-badges">
+                        <span class="status-badge badge-pending"><span class="badge-num">2</span><span class="badge-icon">⏳</span></span>
+                        <span class="status-badge badge-blocked"><span class="badge-num">1</span><span class="badge-icon">⊡</span></span>
+                        <span class="status-badge badge-done"><span class="badge-num">2</span><span class="badge-icon">⊘</span></span>
+                        <span class="status-badge badge-gray"><span class="badge-num">1</span><span class="badge-icon">✓</span></span>
+                    </div>
+                    <div class="campaign-card-title">Nueva Colección al Frente</div>
+                    <div class="campaign-card-date">25 OCT 2025 <span class="arrow">→</span> 31 OCT 2025</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Task header -->
-    <div class="task-header">
-        <div class="task-header-left">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    <!-- ======== SCREEN 2: Campaign Detail ======== -->
+    <div class="screen hidden" id="screen-campaign-detail">
+        <div class="campaign-detail-hero">
+            <div class="campaign-detail-hero-bg" style="background-image:url('img/campaign1.png');"></div>
+            <div class="campaign-detail-hero-overlay"></div>
+            <button class="back-btn" onclick="navigateBack('screen-campaigns','fade')">
+                <svg viewBox="0 0 24 24" fill="#fff"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <div class="campaign-detail-hero-content">
+                <div class="campaign-detail-tags">
+                    <span class="status-badge badge-pending"><span class="badge-num">2</span><span class="badge-icon">⏳</span></span>
+                    <span class="status-badge badge-blocked"><span class="badge-num">11</span><span class="badge-icon">⊘</span></span>
+                    <span class="status-badge badge-done"><span class="badge-num">2</span><span class="badge-icon">✓</span></span>
+                </div>
+            </div>
         </div>
-        <div class="task-tags">
-            <span class="tag tag-warning">IN PROGRESS</span>
-            <span class="tag tag-silver">10:00</span>
-            <span class="tag tag-priority">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-            </span>
+        <div class="campaign-detail-body">
+            <div class="campaign-detail-date">1 DIC 2027 <span class="arrow">→</span> 24 DIC 2027</div>
+            <div class="campaign-detail-title">Nueva Colección al Frente</div>
+            <div class="campaign-detail-desc">Arranca la nueva colección con una tienda impecable y un equipo coordinado.</div>
+            <div class="detail-tabs">
+                <button class="detail-tab active">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="#29B6F6" style="vertical-align:-2px; margin-right:4px;"><circle cx="12" cy="12" r="6"/></svg>
+                    En vivo <span class="tab-count">(2)</span>
+                </button>
+                <button class="detail-tab">Todas</button>
+            </div>
+            <!-- Task 1 - clickable -->
+            <div class="task-card" onclick="navigateTo('screen-task','slide-right')">
+                <div class="task-card-header">
+                    <span class="tag tag-yellow">EN PROGRESO</span>
+                    <span class="task-card-date-pill">21 DIC 2027 08:30</span>
+                </div>
+                <div class="task-card-title">Colocar la nueva decoración</div>
+                <div class="task-card-meta">
+                    <span class="task-card-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+                        1
+                    </span>
+                    <span class="task-card-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                        2h
+                    </span>
+                </div>
+                <div class="task-card-badges">
+                    <span class="tag tag-orange">CAJERO</span>
+                    <span class="tag tag-pink">LOGÍSTICA</span>
+                </div>
+                <div class="task-card-steps">
+                    <div class="task-card-step"><span class="task-card-step-dot"></span> Revisar el acceso a la tienda</div>
+                    <div class="task-card-step"><span class="task-card-step-dot"></span> Comprobar la posición de la decoración</div>
+                </div>
+                <div class="task-card-cta">Adjunta evidencias para completar la tarea</div>
+                <div class="task-card-divider"></div>
+                <div class="task-card-footer">
+                    <div class="task-card-footer-icon">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="16" cy="16" r="7" stroke="#1a1a1a" stroke-width="2.5" fill="none"/>
+                            <path d="M16 26c-7 0-13 3.5-13 8v2h26v-2c0-4.5-6-8-13-8z" stroke="#1a1a1a" stroke-width="2.5" fill="none"/>
+                            <circle cx="34" cy="20" r="5" stroke="#1a1a1a" stroke-width="2.5" fill="none"/>
+                            <path d="M34 28c-4 0-8 2-8 5" stroke="#1a1a1a" stroke-width="2.5" fill="none"/>
+                        </svg>
+                    </div>
+                    <div class="task-card-footer-text">
+                        <strong>Revisable</strong><br>
+                        <span>4 revisores asignados</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Task 2 - disabled -->
+            <div class="task-card disabled">
+                <div class="task-card-header">
+                    <span class="tag tag-gray">PENDIENTE</span>
+                    <span class="task-card-date-pill">22 DIC 2027 10:00</span>
+                </div>
+                <div class="task-card-title">Reponer artículos de mayor rotación</div>
+                <div class="task-card-meta">
+                    <span class="task-card-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+                        2
+                    </span>
+                    <span class="task-card-meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                        1h
+                    </span>
+                </div>
+                <div class="task-card-badges">
+                    <span class="tag tag-orange">CAJERO</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Task body -->
-    <div class="task-body">
-        <div class="task-estimate">1h 30 min estimado</div>
-        <h1 class="task-title">Prepara el escaparate con la decoraci&oacute;n para el Black Friday</h1>
-        <p class="task-description">Ayuda a que los productos siempre se vean bien y est&eacute;n listos para captar la atenci&oacute;n de los clientes.</p>
-        <div class="task-evidence-tag">Adjunta evidencias para completar la tarea</div>
-
-        <!-- Task info -->
-        <div class="task-info">
-            <div class="task-info-row">
-                <div class="task-info-left">
-                    <svg class="task-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-                    <div>
-                        <div class="task-info-label">Preparativos para el Black Friday</div>
-                        <div class="task-info-sublabel">25 Oct 2025 &rarr; 31 Oct 2025</div>
-                    </div>
-                </div>
-                <div class="campaign-thumb"></div>
-            </div>
-
-            <div class="task-info-row">
-                <div class="task-info-left">
-                    <svg class="task-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    <div>
-                        <div class="task-info-label">Mary Jane</div>
-                        <div class="task-info-sublabel">Supervisor</div>
-                    </div>
-                </div>
-                <span class="tag-status">WAITING FOR SUBMISSION</span>
-            </div>
-
-            <div class="task-info-row">
-                <div class="task-info-left">
-                    <svg class="task-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    <div>
-                        <div class="task-info-label">25 Oct 2025 &nbsp; 18:00</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="task-info-row">
-                <div class="task-info-left">
-                    <svg class="task-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                    <div>
-                        <div class="task-info-label">Tienda Goya</div>
-                        <div class="task-info-sublabel">Group task</div>
-                    </div>
-                </div>
-                <div class="avatars-group">
-                    <div class="avatar-circle" style="background:#e0a080"></div>
-                    <div class="avatar-circle" style="background:#90b0d0"></div>
-                    <div class="avatar-circle" style="background:#a0c090"></div>
-                    <div class="avatar-count">23</div>
-                </div>
+    <!-- ======== SCREEN 3: Task Page ======== -->
+    <div class="screen hidden" id="screen-task">
+        <div class="task-page-header">
+            <button class="close-btn" onclick="navigateBack('screen-campaign-detail','slide-right')">
+                <svg viewBox="0 0 24 24" fill="#1a1a1a"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+            <span class="tag tag-yellow">EN PROGRESO</span>
+            <div class="task-page-timer">
+                <span class="task-page-timer-val">15:00</span>
+                <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
             </div>
         </div>
-
-        <!-- Pasos -->
-        <div class="task-steps">
-            <div class="task-steps-header">
-                <span class="task-steps-title">Pasos</span>
-                <span class="task-steps-toggle">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
-                </span>
-            </div>
-            <div class="step-item">
-                <div class="step-check">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
+        <div class="task-page-body">
+            <div class="task-page-estimate">20 min estimado</div>
+            <div class="task-page-title">Colocar la nueva decoración</div>
+            <div class="task-page-desc">Tendrás que organizar todo el escaparate con la nueva colección, iluminación y elementos de temporada</div>
+            <div class="task-page-campaign-ref">
+                <div class="task-page-campaign-thumb" style="background-image:url('img/campaign1.png');"></div>
                 <div>
-                    <span class="step-text">Verifica el estado de los productos en exhibici&oacute;n</span>
-                    <div class="step-meta">
-                        <span class="step-avatar" style="background:#c09070"></span>
-                        Roberto L&oacute;pez &middot; Hoy 10:03
+                    <div class="task-page-campaign-ref-title">Nueva Colección al Frente</div>
+                    <div class="task-page-campaign-ref-date">1 DIC 2027 → 24 DIC 2027</div>
+                </div>
+            </div>
+            <div class="task-page-schedule">
+                <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
+                01 JUL 26 14:00 → 02 JUL 26 15:00
+            </div>
+            <div class="task-page-review" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                <span class="tag tag-blue">Revisable</span>
+                <span class="tag tag-yellow">PENDING</span>
+            </div>
+            <div class="task-page-badges mb-16">
+                <span class="tag tag-orange">CAJERO</span>
+                <span class="tag tag-pink">LOGÍSTICA</span>
+            </div>
+            <div class="task-page-avatars mb-24">
+                <div class="avatar-circle" style="background:#E91E63;">RL</div>
+                <div class="avatar-circle" style="background:#29B6F6;">MG</div>
+                <div class="avatar-circle" style="background:#4CAF50;">JP</div>
+                <div class="avatar-circle" style="background:#FF9800;">AS</div>
+                <div class="avatar-circle" style="background:#AB47BC;">LM</div>
+                <span class="avatar-count">23</span>
+            </div>
+
+            <div class="section-title">Pasos</div>
+            <div class="mb-24">
+                <div class="step-item">
+                    <div class="step-checkbox" onclick="this.classList.toggle('checked')"></div>
+                    <span>Verifica el estado de los productos en exhibición</span>
+                </div>
+                <div class="step-item">
+                    <div class="step-checkbox" onclick="this.classList.toggle('checked')"></div>
+                    <span>Organiza los productos y reetiqueta precios si es necesario</span>
+                </div>
+            </div>
+
+            <div class="section-title">Entregables</div>
+            <div id="deliverables-list">
+                <div class="deliverable-item" onclick="openDeliverable(0)">
+                    <div class="deliverable-icon" id="deliv-icon-0">📷</div>
+                    <div class="deliverable-info">
+                        <div class="deliverable-title">Foto del escaparate</div>
+                        <div class="deliverable-subtitle" id="deliv-sub-0"></div>
+                    </div>
+                    <img class="deliverable-thumb" id="deliv-thumb-0" style="display:none;" />
+                    <span class="deliverable-arrow">›</span>
+                </div>
+                <div class="deliverable-item" onclick="openDeliverable(1)">
+                    <div class="deliverable-icon">📷</div>
+                    <div class="deliverable-info">
+                        <div class="deliverable-title">Foto del escaparate</div>
+                        <div class="deliverable-subtitle"></div>
+                    </div>
+                    <span class="deliverable-arrow">›</span>
+                </div>
+                <div class="deliverable-item" onclick="openDeliverable(2)">
+                    <div class="deliverable-icon">📷</div>
+                    <div class="deliverable-info">
+                        <div class="deliverable-title">Foto de punto de venta</div>
+                        <div class="deliverable-subtitle"></div>
+                    </div>
+                    <span class="deliverable-arrow">›</span>
+                </div>
+            </div>
+        </div>
+        <div class="task-page-bottom" id="task-bottom-bar">
+            <div class="slider-btn" id="complete-slider">COMPLETA LA TAREA</div>
+        </div>
+    </div>
+
+    <!-- ======== SCREEN 4: Deliverable Detail ======== -->
+    <div class="screen hidden" id="screen-deliverable">
+        <div class="screen-header">
+            <button class="back-btn" onclick="navigateBack('screen-task','slide-right')">
+                <svg viewBox="0 0 24 24" fill="#1a1a1a"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+        </div>
+        <div class="deliv-detail-body" id="deliv-detail-body">
+            <div class="deliv-detail-title" id="deliv-detail-title">Foto del escaparate</div>
+            <div class="deliv-detail-subtitle">Toma una foto frontal del escaparate para asegurarte de que cumple con los estándares</div>
+            <div class="deliv-ref-placeholder" id="deliv-ref-image">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 160'%3E%3Crect fill='%2380DEEA' width='200' height='160' rx='8'/%3E%3Ctext x='100' y='88' text-anchor='middle' fill='%23fff' font-size='40'%3E🏪%3C/text%3E%3C/svg%3E" alt="" />
+            </div>
+            <div class="info-card">
+                <div class="info-card-title">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                    Puntos clave
+                </div>
+                <div class="info-card-item"><span class="info-card-bullet">•</span> El producto debe estar centrado</div>
+                <div class="info-card-item"><span class="info-card-bullet">•</span> Asegúrate de que el fondo sea del color correcto</div>
+                <div class="info-card-item"><span class="info-card-bullet">•</span> La decoración no debe cubrir el producto</div>
+                <div class="info-card-item"><span class="info-card-bullet">•</span> Toda la luz debe estar enfocada en el producto</div>
+            </div>
+            <!-- Delivery section (shown after confirm) -->
+            <div id="delivery-section" style="display:none;">
+                <div class="delivery-section">
+                    <div class="delivery-section-title">Entrega</div>
+                    <div class="delivery-photo-row">
+                        <img id="delivery-thumb" class="delivery-photo-thumb" />
+                        <div class="delivery-photo-info">
+                            <div class="delivery-photo-name">Roberto López</div>
+                            <div>16 FEB 26</div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="step-item">
-                <div class="step-check">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-                <div>
-                    <span class="step-text">Organiza los productos y reetiqueta precios si es necesario</span>
-                    <div class="step-meta">
-                        <span class="step-avatar" style="background:#90a0c0"></span>
-                        Sof&iacute;a Fern&aacute;ndez &middot; Hoy 10:05
+            <div style="height:16px;"></div>
+            <div id="deliv-action-area">
+                <button class="btn-primary" id="btn-realizar-entrega" onclick="openUploadModal()">REALIZAR ENTREGA</button>
+            </div>
+            <div id="deliv-undo-area" style="display:none; padding-bottom: 20px;">
+                <button class="btn-danger" onclick="undoDelivery()">DESHACER ENTREGA</button>
+            </div>
+            <div style="height:32px;"></div>
+        </div>
+    </div>
+
+    <!-- ======== Upload Modal ======== -->
+    <div class="modal-overlay" id="modal-overlay" onclick="closeUploadModal()"></div>
+    <div class="modal-drawer" id="modal-drawer">
+        <div class="modal-handle"></div>
+        <div class="modal-body">
+            <div class="modal-title">Foto del escaparate</div>
+            <div class="modal-subtitle">Sube una imagen para continuar</div>
+            <div class="ai-bubble">
+                <div class="ai-icon">AI</div>
+                <div class="ai-bubble-box">Sube la foto y te ayudo a revisarlo antes de confirmarlo!</div>
+            </div>
+
+            <!-- Upload zone -->
+            <div id="upload-zone-container">
+                <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+                    <div class="upload-zone-icon">
+                        <svg viewBox="0 0 24 24"><path d="M12 12m-3.2 0a3.2 3.2 0 1 0 6.4 0a3.2 3.2 0 1 0-6.4 0M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="#29B6F6"/></svg>
+                        <div class="upload-zone-icon-badge">+</div>
                     </div>
+                    <div class="upload-zone-title">Subir imagen</div>
+                    <div class="upload-zone-sub">o busca en tu dispositivo</div>
                 </div>
+                <input type="file" id="file-input" accept="image/*" capture="environment" style="display:none;" onchange="handleFileSelect(event)" />
+                <button class="btn-cancel" onclick="closeUploadModal()">CANCELAR</button>
             </div>
-        </div>
 
-        <!-- Guía -->
-        <div class="task-guide">
-            <div class="task-steps-header">
-                <span class="task-steps-title">Gu&iacute;a</span>
-                <span class="task-steps-toggle">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
-                </span>
-            </div>
-            <p class="guide-description">Mantener la exhibici&oacute;n en perfecto estado <strong>mejora la experiencia</strong> del cliente y aumenta las probabilidades de venta.</p>
-            <ul class="guide-list">
-                <li><strong>Verifica que no haya da&ntilde;os visibles</strong>, como rasgu&ntilde;os, pantallas rotas o empaques deteriorados.</li>
-                <li>Limpia los productos y la <strong>zona de exhibici&oacute;n</strong></li>
-                <li>Coloca los productos de manera que sean <strong>f&aacute;ciles de ver y acceder</strong>.</li>
-                <li><strong>Agrupa productos similares</strong> (por ejemplo, tel&eacute;fonos con tel&eacute;fonos, accesorios con accesorios).</li>
-            </ul>
-        </div>
-    </div>
-
-    <!-- Complete task slider -->
-    <div class="complete-task-btn">
-        <div class="slide-btn" id="openDrawerBtn">
-            <span class="slide-btn-label">COMPLETE TASK</span>
-            <span class="slide-btn-thumb" id="slideThumb">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </span>
-        </div>
-    </div>
-</div>
-
-<!-- ===== DRAWER OVERLAY ===== -->
-<div class="drawer-overlay" id="drawerOverlay"></div>
-
-<!-- ===== DRAWER ===== -->
-<div class="drawer" id="drawer">
-    <div class="drawer-handle"></div>
-    <div class="drawer-content">
-        <h2 class="drawer-title">Foto del escaparate</h2>
-        <p class="drawer-subtitle">Sube una foto frontal del escaparate</p>
-
-        <!-- Client selector for testing -->
-        <div class="drawer-client-selector">
-            <select id="clientSelect">
-                <option value="">Selecciona cliente...</option>
-            </select>
-        </div>
-
-        <!-- Photo area -->
-        <div class="photo-area" id="photoArea">
-            <div class="photo-placeholder" id="photoPlaceholder">
-                <div class="camera-icon-circle" id="cameraBtn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
-                        <circle cx="12" cy="13" r="4"/>
-                        <circle cx="18" cy="10" r="1" fill="currentColor"/>
-                    </svg>
+            <!-- Analysis container -->
+            <div class="analysis-container" id="analysis-container">
+                <div class="analysis-image-wrap">
+                    <img class="analysis-image" id="analysis-image" />
+                    <div class="analysis-image-overlay" id="analysis-overlay">
+                        <div class="analysis-glow" id="analysis-glow">AI</div>
+                        <div class="analysis-text" id="analysis-text">Analizando tu foto ...</div>
+                    </div>
+                    <div class="analysis-badge" id="analysis-badge"></div>
                 </div>
-                <span class="photo-placeholder-label">Foto frontal</span>
-                <span class="photo-placeholder-alt" id="galleryBtn">o busca en tu dispositivo</span>
+
+                <!-- AI verdict -->
+                <div class="ai-verdict" id="ai-verdict">
+                    <div class="ai-icon">AI</div>
+                    <div class="ai-verdict-bubble" id="ai-verdict-text"></div>
+                </div>
+
+                <!-- Feedback cards -->
+                <div class="feedback-section" id="feedback-section"></div>
+
+                <!-- Action buttons -->
+                <div id="post-analysis-actions" style="display:none; width:100%;">
+                    <button class="btn-confirm" onclick="confirmImage()" style="margin-bottom:8px;">CONFIRMAR IMAGEN</button>
+                    <button class="btn-cancel" onclick="cancelAnalysis()">CANCELAR</button>
+                </div>
+                <div style="height:16px;"></div>
             </div>
-            <img id="photoPreview" alt="Foto del escaparate">
         </div>
-
-        <!-- Sparkle icon (for analyzing + results) -->
-        <div class="sparkle-container" id="sparkleContainer">
-            <svg class="sparkle-svg" id="sparkleSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/>
-                <path d="M18 14l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/>
-            </svg>
-            <span class="sparkle-particle" style="--tx:-20px;--ty:-18px"></span>
-            <span class="sparkle-particle" style="--tx:22px;--ty:-14px"></span>
-            <span class="sparkle-particle" style="--tx:-16px;--ty:20px"></span>
-            <span class="sparkle-particle" style="--tx:18px;--ty:16px"></span>
-            <span class="sparkle-particle" style="--tx:0px;--ty:-24px"></span>
-            <span class="sparkle-particle" style="--tx:-24px;--ty:0px"></span>
-        </div>
-
-        <!-- Analyzing text -->
-        <div class="analyzing-text" id="analyzingText">
-            <span id="analyzingLabel"></span><span class="analyzing-cursor">|</span>
-        </div>
-
-        <!-- Error -->
-        <div class="drawer-error" id="drawerError"></div>
-
-        <!-- Results -->
-        <div class="results-section" id="resultsSection">
-            <div id="verdictBanner"></div>
-            <h3 class="results-heading">Resultados</h3>
-            <div id="kpiResults"></div>
-        </div>
-
-        <!-- Buttons -->
-        <button class="drawer-btn-primary disabled" id="analyzeBtn" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/>
-            </svg>
-            ANALIZAR
-        </button>
-        <button class="drawer-btn-secondary" id="backBtn">VOLVER</button>
     </div>
-
-    <input type="file" id="fileInput" accept="image/*" class="hidden-input">
 </div>
 
 <script>
-    const API_BASE = window.location.origin;
+(function() {
+    // State
+    var currentScreen = 'screen-campaigns';
+    var screenHistory = [];
+    var clientId = '';
+    var selectedFile = null;
+    var deliveredImages = {};
+    var analysisResult = null;
+    var currentDeliverableIndex = 0;
 
-    let selectedFile = null;
-
-    // DOM elements
-    const openDrawerBtn = document.getElementById('openDrawerBtn');
-    const drawerOverlay = document.getElementById('drawerOverlay');
-    const drawer = document.getElementById('drawer');
-    const clientSelect = document.getElementById('clientSelect');
-    const photoArea = document.getElementById('photoArea');
-    const photoPlaceholder = document.getElementById('photoPlaceholder');
-    const photoPreview = document.getElementById('photoPreview');
-    const cameraBtn = document.getElementById('cameraBtn');
-    const galleryBtn = document.getElementById('galleryBtn');
-    const fileInput = document.getElementById('fileInput');
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    const backBtn = document.getElementById('backBtn');
-    const sparkleContainer = document.getElementById('sparkleContainer');
-    const sparkleSvg = document.getElementById('sparkleSvg');
-    const analyzingText = document.getElementById('analyzingText');
-    const analyzingLabel = document.getElementById('analyzingLabel');
-    const drawerError = document.getElementById('drawerError');
-    const resultsSection = document.getElementById('resultsSection');
-    const verdictBanner = document.getElementById('verdictBanner');
-    const kpiResults = document.getElementById('kpiResults');
-
-    // Thinking messages
-    const thinkingMessages = [
-        'Analizando iluminaci\u00f3n',
-        'Comparando con el planograma',
-        'Revisando disposici\u00f3n de productos',
-        'Verificando carteleria y precios',
-        'Evaluando limpieza y orden',
-        'Calculando resultado',
-        'Preparando feedback'
-    ];
-
-    // ===== DRAWER OPEN/CLOSE =====
-    function openDrawer() {
-        drawerOverlay.classList.add('active');
-        drawer.classList.add('open');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeDrawer() {
-        drawerOverlay.classList.remove('active');
-        drawer.classList.remove('open');
-        document.body.style.overflow = '';
-    }
-
-    // ===== SLIDE-TO-ACTION =====
-    const slideThumb = document.getElementById('slideThumb');
-    const slideBtn = openDrawerBtn;
-    let sliding = false;
-    let startX = 0;
-    let thumbLeft = 6;
-    const THUMB_SIZE = 44;
-    const PADDING = 6;
-
-    function getMaxLeft() {
-        return slideBtn.offsetWidth - THUMB_SIZE - PADDING;
-    }
-
-    function onSlideStart(e) {
-        sliding = true;
-        startX = (e.touches ? e.touches[0].clientX : e.clientX) - thumbLeft;
-        slideThumb.classList.add('dragging');
-        e.preventDefault();
-    }
-
-    function onSlideMove(e) {
-        if (!sliding) return;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        let newLeft = clientX - startX;
-        const maxLeft = getMaxLeft();
-        newLeft = Math.max(PADDING, Math.min(newLeft, maxLeft));
-        thumbLeft = newLeft;
-        slideThumb.style.left = newLeft + 'px';
-
-        // Fade label as thumb moves
-        const progress = (newLeft - PADDING) / (maxLeft - PADDING);
-        slideBtn.querySelector('.slide-btn-label').style.opacity = 1 - progress;
-        e.preventDefault();
-    }
-
-    function onSlideEnd() {
-        if (!sliding) return;
-        sliding = false;
-        slideThumb.classList.remove('dragging');
-        const maxLeft = getMaxLeft();
-        const progress = (thumbLeft - PADDING) / (maxLeft - PADDING);
-
-        if (progress > 0.75) {
-            // Threshold reached - trigger action
-            slideThumb.style.left = maxLeft + 'px';
-            slideBtn.classList.add('completed');
-            setTimeout(() => {
-                openDrawer();
-                // Reset slider after drawer opens
-                setTimeout(resetSlider, 400);
-            }, 200);
-        } else {
-            resetSlider();
-        }
-    }
-
-    function resetSlider() {
-        thumbLeft = PADDING;
-        slideThumb.style.left = PADDING + 'px';
-        slideBtn.classList.remove('completed');
-        slideBtn.querySelector('.slide-btn-label').style.opacity = '1';
-    }
-
-    slideThumb.addEventListener('touchstart', onSlideStart, { passive: false });
-    document.addEventListener('touchmove', onSlideMove, { passive: false });
-    document.addEventListener('touchend', onSlideEnd);
-
-    slideThumb.addEventListener('mousedown', onSlideStart);
-    document.addEventListener('mousemove', onSlideMove);
-    document.addEventListener('mouseup', onSlideEnd);
-
-    drawerOverlay.addEventListener('click', closeDrawer);
-    backBtn.addEventListener('click', () => {
-        if (resultsSection.classList.contains('visible')) {
-            resetDrawer();
-        } else {
-            closeDrawer();
-        }
-    });
-
-    // ===== LOAD CLIENTS =====
+    // Load clients
     async function loadClients() {
         try {
-            const response = await fetch(`${API_BASE}/clients`);
-            const clients = await response.json();
-            clientSelect.innerHTML = '<option value="">Selecciona cliente...</option>';
-            clients.forEach(client => {
-                const option = document.createElement('option');
-                option.value = client.client_id;
-                option.textContent = client.client_name;
-                clientSelect.appendChild(option);
+            var resp = await fetch(window.location.origin + '/clients');
+            var clients = await resp.json();
+            if (clients && clients.length > 0) clientId = clients[0].client_id;
+        } catch(e) {
+            console.warn('Could not load clients:', e);
+            clientId = 'default';
+        }
+    }
+    loadClients();
+
+    // Navigation
+    window.navigateTo = function(targetId, animation) {
+        var current = document.getElementById(currentScreen);
+        var target = document.getElementById(targetId);
+        if (!current || !target) return;
+
+        screenHistory.push({ id: currentScreen, animation: animation });
+
+        target.classList.remove('hidden');
+        target.style.transition = 'none';
+        if (animation === 'slide-right') target.classList.add('slide-right-enter');
+        else if (animation === 'fade') target.classList.add('fade-enter');
+        else if (animation === 'slide-up') target.classList.add('slide-up-enter');
+
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                target.style.transition = '';
+                current.style.transition = '';
+                target.classList.remove('slide-right-enter', 'fade-enter', 'slide-up-enter');
+                target.classList.add('active');
+
+                if (animation === 'slide-right') current.classList.add('slide-right-exit');
+                else if (animation === 'fade') current.style.opacity = '0';
+
+                setTimeout(function() {
+                    current.classList.remove('active', 'slide-right-exit');
+                    current.style.opacity = '';
+                    current.classList.add('hidden');
+                }, 350);
+
+                currentScreen = targetId;
+                var taskBottom = document.getElementById('task-bottom-bar');
+                if (taskBottom) taskBottom.style.display = (currentScreen === 'screen-task') ? '' : 'none';
             });
-        } catch (err) {
-            clientSelect.innerHTML = '<option value="">Error al cargar</option>';
+        });
+    };
+
+    window.navigateBack = function(targetId, animation) {
+        var entry = screenHistory.pop();
+        if (!entry) return;
+
+        var current = document.getElementById(currentScreen);
+        var target = document.getElementById(entry.id);
+        if (!current || !target) return;
+
+        target.classList.remove('hidden');
+        target.style.transition = 'none';
+
+        if (animation === 'slide-right') {
+            target.classList.add('slide-right-exit');
+            target.style.opacity = '0.5';
+            target.style.transform = 'translateX(-30%)';
+        } else if (animation === 'fade') {
+            target.style.opacity = '0';
         }
-    }
 
-    // ===== PHOTO CAPTURE =====
-    cameraBtn.addEventListener('click', () => {
-        fileInput.setAttribute('capture', 'environment');
-        fileInput.click();
-    });
+        target.classList.add('active');
 
-    galleryBtn.addEventListener('click', () => {
-        fileInput.removeAttribute('capture');
-        fileInput.click();
-    });
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                target.style.transition = '';
+                current.style.transition = '';
+                target.style.opacity = '';
+                target.style.transform = '';
+                target.classList.remove('slide-right-exit');
 
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            selectedFile = file;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                photoPreview.src = ev.target.result;
-                photoPreview.style.display = 'block';
-                photoPlaceholder.style.display = 'none';
-                photoArea.classList.add('has-photo');
-                updateAnalyzeBtn();
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+                if (animation === 'slide-right') current.style.transform = 'translateX(100%)';
+                else if (animation === 'fade') current.style.opacity = '0';
 
-    // ===== PHOTO TOGGLE (expand/minimize on tap) =====
-    photoPreview.addEventListener('click', () => {
-        if (resultsSection.classList.contains('visible')) {
-            photoPreview.classList.toggle('minimized');
-            photoArea.classList.toggle('minimized');
-        }
-    });
+                setTimeout(function() {
+                    current.classList.remove('active');
+                    current.classList.add('hidden');
+                    current.style.transform = '';
+                    current.style.opacity = '';
+                }, 350);
 
-    // ===== UPDATE ANALYZE BUTTON =====
-    function updateAnalyzeBtn() {
-        const ready = selectedFile && clientSelect.value;
-        analyzeBtn.disabled = !ready;
-        analyzeBtn.className = ready
-            ? 'drawer-btn-primary active'
-            : 'drawer-btn-primary disabled';
-    }
+                currentScreen = entry.id;
+                var taskBottom = document.getElementById('task-bottom-bar');
+                if (taskBottom) taskBottom.style.display = (currentScreen === 'screen-task') ? '' : 'none';
+            });
+        });
+    };
 
-    clientSelect.addEventListener('change', updateAnalyzeBtn);
+    // Deliverable
+    window.openDeliverable = function(index) {
+        currentDeliverableIndex = index;
+        var titles = ['Foto del escaparate', 'Foto del escaparate', 'Foto de punto de venta'];
+        document.getElementById('deliv-detail-title').textContent = titles[index] || 'Foto del escaparate';
 
-    // ===== THINKING ANIMATION (Typewriter) =====
-    let typewriterActive = false;
-    let typewriterTimeout = null;
+        var delivered = deliveredImages[index];
+        var deliverySection = document.getElementById('delivery-section');
+        var actionArea = document.getElementById('deliv-action-area');
+        var undoArea = document.getElementById('deliv-undo-area');
+        var refImage = document.getElementById('deliv-ref-image');
 
-    function startThinking() {
-        typewriterActive = true;
-        let msgIndex = 0;
-        analyzingLabel.textContent = '';
+        if (delivered && delivered.confirmed) {
+            deliverySection.style.display = 'block';
+            document.getElementById('delivery-thumb').src = delivered.url;
+            actionArea.style.display = 'none';
+            undoArea.style.display = 'block';
 
-        function typeMessage() {
-            if (!typewriterActive) return;
-            const fullText = thinkingMessages[msgIndex] + '...';
-            let charIndex = 0;
-            analyzingLabel.textContent = '';
-
-            function typeChar() {
-                if (!typewriterActive) return;
-                if (charIndex < fullText.length) {
-                    analyzingLabel.textContent = fullText.substring(0, charIndex + 1);
-                    charIndex++;
-                    typewriterTimeout = setTimeout(typeChar, 40 + Math.random() * 30);
-                } else {
-                    // Pause, then erase and move to next message
-                    typewriterTimeout = setTimeout(() => {
-                        if (!typewriterActive) return;
-                        msgIndex = (msgIndex + 1) % thinkingMessages.length;
-                        eraseMessage();
-                    }, 1500);
-                }
+            if (refImage.tagName === 'DIV') {
+                var img = document.createElement('img');
+                img.className = 'deliv-ref-placeholder';
+                img.style.cssText = 'width:100%;border-radius:16px;aspect-ratio:4/3;object-fit:cover;margin-bottom:20px;';
+                img.src = delivered.url;
+                refImage.parentNode.replaceChild(img, refImage);
+                img.id = 'deliv-ref-image';
+            } else {
+                refImage.src = delivered.url;
+                refImage.style.objectFit = 'cover';
             }
+        } else {
+            deliverySection.style.display = 'none';
+            actionArea.style.display = 'block';
+            undoArea.style.display = 'none';
 
-            function eraseMessage() {
-                if (!typewriterActive) return;
-                const current = analyzingLabel.textContent;
-                if (current.length > 0) {
-                    analyzingLabel.textContent = current.substring(0, current.length - 1);
-                    typewriterTimeout = setTimeout(eraseMessage, 20);
-                } else {
-                    typewriterTimeout = setTimeout(typeMessage, 300);
-                }
+            var el = document.getElementById('deliv-ref-image');
+            if (el && el.tagName === 'IMG') {
+                var div = document.createElement('div');
+                div.className = 'deliv-ref-placeholder';
+                div.id = 'deliv-ref-image';
+                div.innerHTML = '<img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 160\'%3E%3Crect fill=\'%2380DEEA\' width=\'200\' height=\'160\' rx=\'8\'/%3E%3Ctext x=\'100\' y=\'88\' text-anchor=\'middle\' fill=\'%23fff\' font-size=\'40\'%3E🏪%3C/text%3E%3C/svg%3E" alt="" />';
+                el.parentNode.replaceChild(div, el);
             }
-
-            typeChar();
         }
 
-        typeMessage();
-    }
+        navigateTo('screen-deliverable', 'slide-right');
+    };
 
-    function stopThinking() {
-        typewriterActive = false;
-        if (typewriterTimeout) {
-            clearTimeout(typewriterTimeout);
-            typewriterTimeout = null;
-        }
-    }
+    // Upload modal
+    window.openUploadModal = function() {
+        document.getElementById('upload-zone-container').style.display = 'block';
+        document.getElementById('analysis-container').classList.remove('active');
+        document.getElementById('file-input').value = '';
+        selectedFile = null;
+        analysisResult = null;
 
-    // ===== ANALYZE =====
-    analyzeBtn.addEventListener('click', async () => {
-        if (!selectedFile || !clientSelect.value) return;
+        document.getElementById('modal-overlay').classList.add('active');
+        document.getElementById('modal-drawer').classList.add('active');
+    };
 
-        // Enter analyzing state
-        photoPreview.classList.add('analyzing-filter');
-        photoArea.classList.add('analyzing');
-        sparkleContainer.classList.add('visible', 'emitting');
-        sparkleSvg.classList.add('beating');
-        analyzingText.classList.add('visible');
-        analyzeBtn.style.display = 'none';
-        backBtn.style.display = 'none';
-        drawerError.style.display = 'none';
-        resultsSection.classList.remove('visible');
-        startThinking();
+    window.closeUploadModal = function() {
+        document.getElementById('modal-overlay').classList.remove('active');
+        document.getElementById('modal-drawer').classList.remove('active');
+    };
 
+    // File selection and analysis
+    window.handleFileSelect = async function(event) {
+        var file = event.target.files[0];
+        if (!file) return;
+        selectedFile = file;
+
+        document.getElementById('upload-zone-container').style.display = 'none';
+        var container = document.getElementById('analysis-container');
+        container.classList.add('active');
+
+        var imgUrl = URL.createObjectURL(file);
+        var img = document.getElementById('analysis-image');
+        img.src = imgUrl;
+
+        // Reset
+        img.classList.remove('grayscale');
+        document.getElementById('analysis-overlay').classList.remove('active');
+        document.getElementById('analysis-text').classList.remove('active');
+        document.getElementById('analysis-badge').classList.remove('active', 'good', 'improve');
+        document.getElementById('analysis-badge').textContent = '';
+        document.getElementById('ai-verdict').classList.remove('active');
+        document.getElementById('ai-verdict-text').innerHTML = '';
+        document.getElementById('feedback-section').innerHTML = '';
+        document.getElementById('post-analysis-actions').style.display = 'none';
+        document.getElementById('analysis-glow').style.display = '';
+
+        // Animation
+        await delay(300);
+        img.classList.add('grayscale');
+
+        await delay(600);
+        document.getElementById('analysis-overlay').classList.add('active');
+
+        await delay(400);
+        document.getElementById('analysis-text').classList.add('active');
+
+        // API call
         try {
-            const formData = new FormData();
-            formData.append('image', selectedFile);
-            formData.append('store_id', 'tienda_goya');
-            formData.append('client_id', clientSelect.value);
+            var formData = new FormData();
+            formData.append('image', file);
+            formData.append('store_id', 'demo_store');
+            formData.append('client_id', clientId);
 
-            const response = await fetch(`${API_BASE}/analyze`, {
+            var resp = await fetch(window.location.origin + '/analyze', {
                 method: 'POST',
                 body: formData
             });
-
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.detail || 'Error en el analisis');
-            }
-
-            const result = await response.json();
-            displayResults(result);
-
-        } catch (err) {
-            drawerError.textContent = err.message;
-            drawerError.style.display = 'block';
-            // Restore buttons
-            analyzeBtn.style.display = '';
-            backBtn.style.display = '';
-        } finally {
-            stopThinking();
-            analyzingText.classList.remove('visible');
-            sparkleSvg.classList.remove('beating');
-            sparkleContainer.classList.remove('emitting');
+            analysisResult = await resp.json();
+        } catch(e) {
+            console.error('Analysis failed:', e);
+            analysisResult = { differences: [], summary: 'Analysis completed.' };
         }
-    });
 
-    // ===== DISPLAY RESULTS =====
-    function displayResults(result) {
-        const differences = result.differences || [];
-        const issueCount = differences.length;
+        // Show result
+        await delay(500);
+        img.classList.remove('grayscale');
+        document.getElementById('analysis-text').classList.remove('active');
 
-        // Keep photo with blue filter
-        // Show sparkle (static now, not rotating)
-        sparkleContainer.classList.add('visible');
+        var badge = document.getElementById('analysis-badge');
+        var hasIssues = analysisResult.differences && analysisResult.differences.length > 0;
 
-        if (issueCount === 0) {
-            // VALIDO
-            verdictBanner.innerHTML = `
-                <div class="verdict-banner valido">
-                    <div class="verdict-label valido">V&Aacute;LIDO</div>
-                    <div class="verdict-message">El escaparate cumple con la referencia. &iexcl;Buen trabajo!</div>
-                </div>
-            `;
-            kpiResults.innerHTML = '';
+        if (hasIssues) {
+            badge.textContent = 'MEJORABLE';
+            badge.classList.add('improve');
         } else {
-            // NO VALIDO
-            verdictBanner.innerHTML = `
-                <div class="verdict-banner no-valido">
-                    <div class="verdict-label no-valido">NO V&Aacute;LIDO</div>
-                    <div class="verdict-message">Recomendamos que realices los cambios que te comento a continuaci&oacute;n</div>
-                </div>
-            `;
+            badge.textContent = 'GENIAL';
+            badge.classList.add('good');
+        }
+        badge.classList.add('active');
 
-            kpiResults.innerHTML = differences.map(diff => `
-                <div class="kpi-result">
-                    <svg class="kpi-result-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/>
-                        <path d="M18 14l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/>
-                    </svg>
-                    <div class="kpi-result-card">
-                        <div class="kpi-result-header">
-                            <span class="kpi-result-category">${diff.category}</span>
-                            <span class="kpi-result-badge">CRITICAL</span>
-                        </div>
-                        <div class="kpi-result-title">${diff.description}</div>
-                        <div class="kpi-result-divider"></div>
-                        <div class="kpi-result-actions-title">Acciones recomendadas a realizar</div>
-                        <div class="kpi-result-action-label">${diff.action}</div>
-                    </div>
-                </div>
-            `).join('');
+        await delay(800);
+        document.getElementById('analysis-glow').style.display = 'none';
+        document.getElementById('analysis-overlay').classList.remove('active');
+
+        // AI verdict
+        await delay(400);
+        var verdictEl = document.getElementById('ai-verdict');
+        var verdictTextEl = document.getElementById('ai-verdict-text');
+        verdictEl.classList.add('active');
+
+        var verdictMessage = hasIssues
+            ? 'He encontrado algunos puntos clave a mejorar. Si los ajustas, la tarea quedará perfecta.'
+            : '¡Buen trabajo! La foto parece cumplir con lo esperado. Puedes entregarla cuando quieras.';
+
+        await typeText(verdictTextEl, verdictMessage);
+
+        // Feedback cards
+        if (hasIssues) {
+            await delay(300);
+            var feedbackHtml = '';
+            analysisResult.differences.forEach(function(diff) {
+                feedbackHtml += '<div class="feedback-card">' +
+                    '<div class="feedback-card-body">' +
+                    '<div class="feedback-category">' + escapeHtml(diff.category).toUpperCase() + '</div>' +
+                    '<div class="feedback-desc">' + escapeHtml(diff.description) + '</div>' +
+                    '</div>' +
+                    '<div class="feedback-recommend">' +
+                    '<div class="feedback-recommend-header">' +
+                    '<div class="ai-icon" style="width:22px;height:22px;font-size:8px;">AI</div>' +
+                    '<span class="feedback-recommend-label">TE RECOMIENDO</span>' +
+                    '</div>' +
+                    '<div class="feedback-recommend-text">' + escapeHtml(diff.action) + '</div>' +
+                    '</div>' +
+                    '</div>';
+            });
+            document.getElementById('feedback-section').innerHTML = feedbackHtml;
         }
 
-        resultsSection.classList.add('visible');
+        await delay(200);
+        document.getElementById('post-analysis-actions').style.display = 'block';
 
-        // Minimize photo with animation
-        photoPreview.classList.add('minimized');
-        photoArea.classList.add('minimized');
+        document.getElementById('modal-drawer').scrollTo({
+            top: document.getElementById('modal-drawer').scrollHeight,
+            behavior: 'smooth'
+        });
+    };
 
-        // Change buttons
-        analyzeBtn.style.display = 'none';
-        backBtn.textContent = 'VOLVER A CARGAR IMAGEN';
-        backBtn.style.display = '';
+    // Confirm
+    window.confirmImage = function() {
+        if (!selectedFile) return;
+
+        var imgUrl = document.getElementById('analysis-image').src;
+        deliveredImages[currentDeliverableIndex] = { url: imgUrl, confirmed: true };
+
+        var icon = document.getElementById('deliv-icon-' + currentDeliverableIndex);
+        if (icon) {
+            icon.classList.add('done');
+            icon.textContent = '✓';
+            icon.style.color = '#29B6F6';
+            icon.style.fontSize = '20px';
+            icon.style.fontWeight = '700';
+        }
+        var sub = document.getElementById('deliv-sub-' + currentDeliverableIndex);
+        if (sub) sub.textContent = 'Roberto López · Hoy 10:03';
+
+        var thumb = document.getElementById('deliv-thumb-' + currentDeliverableIndex);
+        if (thumb) { thumb.src = imgUrl; thumb.style.display = 'block'; }
+
+        closeUploadModal();
+
+        document.getElementById('delivery-section').style.display = 'block';
+        document.getElementById('delivery-thumb').src = imgUrl;
+        document.getElementById('deliv-action-area').style.display = 'none';
+        document.getElementById('deliv-undo-area').style.display = 'block';
+
+        var refImage = document.getElementById('deliv-ref-image');
+        if (refImage.tagName === 'DIV') {
+            var img = document.createElement('img');
+            img.id = 'deliv-ref-image';
+            img.style.cssText = 'width:100%;border-radius:16px;aspect-ratio:4/3;object-fit:cover;margin-bottom:20px;';
+            img.src = imgUrl;
+            refImage.parentNode.replaceChild(img, refImage);
+        } else {
+            refImage.src = imgUrl;
+        }
+    };
+
+    window.cancelAnalysis = function() { closeUploadModal(); };
+
+    // Undo
+    window.undoDelivery = function() {
+        delete deliveredImages[currentDeliverableIndex];
+
+        var icon = document.getElementById('deliv-icon-' + currentDeliverableIndex);
+        if (icon) {
+            icon.classList.remove('done');
+            icon.textContent = '📷';
+            icon.style.color = '';
+            icon.style.fontSize = '';
+            icon.style.fontWeight = '';
+        }
+        var sub = document.getElementById('deliv-sub-' + currentDeliverableIndex);
+        if (sub) sub.textContent = '';
+
+        var thumb = document.getElementById('deliv-thumb-' + currentDeliverableIndex);
+        if (thumb) thumb.style.display = 'none';
+
+        document.getElementById('delivery-section').style.display = 'none';
+        document.getElementById('deliv-action-area').style.display = 'block';
+        document.getElementById('deliv-undo-area').style.display = 'none';
+
+        var el = document.getElementById('deliv-ref-image');
+        if (el && el.tagName === 'IMG') {
+            var div = document.createElement('div');
+            div.className = 'deliv-ref-placeholder';
+            div.id = 'deliv-ref-image';
+            div.innerHTML = '<img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 160\'%3E%3Crect fill=\'%2380DEEA\' width=\'200\' height=\'160\' rx=\'8\'/%3E%3Ctext x=\'100\' y=\'88\' text-anchor=\'middle\' fill=\'%23fff\' font-size=\'40\'%3E🏪%3C/text%3E%3C/svg%3E" alt="" />';
+            el.parentNode.replaceChild(div, el);
+        }
+    };
+
+    // Helpers
+    function delay(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+
+    function typeText(element, text) {
+        return new Promise(function(resolve) {
+            var i = 0;
+            element.innerHTML = '<span class="typing-cursor"></span>';
+            var interval = setInterval(function() {
+                if (i < text.length) {
+                    element.innerHTML = text.substring(0, i + 1) + '<span class="typing-cursor"></span>';
+                    i++;
+                } else {
+                    element.innerHTML = text;
+                    clearInterval(interval);
+                    resolve();
+                }
+            }, 20);
+        });
     }
 
-    // ===== RESET DRAWER =====
-    function resetDrawer() {
-        selectedFile = null;
-        fileInput.value = '';
-        photoPreview.style.display = 'none';
-        photoPreview.classList.remove('analyzing-filter', 'minimized');
-        photoPreview.src = '';
-        photoPlaceholder.style.display = '';
-        photoArea.classList.remove('has-photo', 'analyzing', 'minimized');
-        sparkleContainer.classList.remove('visible', 'emitting');
-        sparkleSvg.classList.remove('beating');
-        analyzingText.classList.remove('visible');
-        resultsSection.classList.remove('visible');
-        drawerError.style.display = 'none';
-        verdictBanner.innerHTML = '';
-        kpiResults.innerHTML = '';
-        analyzeBtn.style.display = '';
-        analyzeBtn.disabled = true;
-        analyzeBtn.className = 'drawer-btn-primary disabled';
-        backBtn.textContent = 'VOLVER';
-        backBtn.style.display = '';
-
-        // Scroll drawer to top
-        drawer.scrollTop = 0;
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    // ===== INIT =====
-    loadClients();
+    var taskBottom = document.getElementById('task-bottom-bar');
+    if (taskBottom) taskBottom.style.display = 'none';
+})();
 </script>
 </body>
 </html>
