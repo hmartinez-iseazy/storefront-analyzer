@@ -26,6 +26,12 @@ uploads/*
 *.swp
 *.swo
 
+# Logs
+*.log
+
+# MCP config
+.mcp.json
+
 # OS
 .DS_Store
 Thumbs.db
