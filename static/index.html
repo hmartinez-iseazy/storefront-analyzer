@@ -5,1371 +5,1945 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Storefront Analyzer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.40.0/dist/tabler-icons.min.css">
     <style>
+        /* ========== DESIGN TOKENS ========== */
+        :root {
+            --color-accent: #0ea5e9;
+            --color-warning: #ff9700;
+            --color-warning-extralight: #ffefbf;
+            --color-error: #f5222d;
+            --color-error-extralight: #fcc7dd;
+            --color-success: #85dd01;
+            --color-success-extralight: #e8f7ba;
+            --color-silver: #a7a7ad;
+            --color-silver-extralight: #e9e9eb;
+            --color-superb: #07a7f1;
+            --color-superb-extralight: #c0f0fc;
+            --color-course: #fe5722;
+            --color-course-extralight: #ffe4c7;
+            --color-ai: #fe5722;
+            --color-ai-extralight: #fff5e8;
+            --color-text-primary: #282828;
+            --color-text-secondary: #909090;
+            --color-text-tertiary: #d8d8d8;
+            --color-text-contrast: #fff;
+            --color-bg: #fff;
+            --color-bg-filled: #f5f5f5;
+            --color-border: #f5f5f5;
+            --color-border-contrast: #d8d8d8;
+            --color-client: #2d8fe2;
+            --space-2: 2px; --space-4: 4px; --space-8: 8px; --space-12: 12px;
+            --space-16: 16px; --space-20: 20px; --space-24: 24px; --space-32: 32px;
+            --space-48: 48px; --space-64: 64px;
+            --radius-4: 4px; --radius-8: 8px; --radius-16: 16px; --radius-24: 24px; --radius-32: 32px;
+            --shadow-md: 0px 4px 6px -1px rgba(0,0,0,0.1), 0px 2px 4px -2px rgba(119,119,119,0.1);
+            --font: 'Roboto', sans-serif;
+        }
+
+        /* ========== RESET & BASE ========== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f5f5f5;
-            color: #1a1a1a;
+            font-family: var(--font);
+            background: #f0f0f0;
+            color: var(--color-text-primary);
             min-height: 100vh;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
+        button { font-family: var(--font); border: none; cursor: pointer; background: none; }
+        img { display: block; max-width: 100%; }
+        a { text-decoration: none; color: inherit; }
+
+        /* ========== APP SHELL ========== */
         .app-shell {
             max-width: 414px;
             margin: 0 auto;
-            background: #fff;
-            min-height: 100vh;
+            background: var(--color-bg);
+            height: 100vh;
             position: relative;
             overflow: hidden;
         }
 
-        /* Screen system */
+        /* ========== SCREEN SYSTEM ========== */
         .screen {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: #fff;
+            background: var(--color-bg);
             overflow-y: auto;
             overflow-x: hidden;
-            transition: transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s cubic-bezier(.4,0,.2,1);
             will-change: transform, opacity;
             -webkit-overflow-scrolling: touch;
         }
-        .screen.hidden { display: none; }
+        .screen.animating {
+            transition: transform 0.35s cubic-bezier(.4,0,.2,1), opacity 0.35s cubic-bezier(.4,0,.2,1);
+        }
+        .screen.hidden { display: none !important; }
+        .screen.screen-flex { display: flex; flex-direction: column; }
         .screen.slide-right-enter { transform: translateX(100%); }
         .screen.slide-right-exit { transform: translateX(-30%); opacity: 0.5; }
         .screen.slide-left-enter { transform: translateX(-100%); }
-        .screen.fade-enter { opacity: 0; }
-        .screen.slide-up-enter { transform: translateY(100%); }
-        .screen.active { transform: translateX(0); opacity: 1; z-index: 2; }
 
-        /* Status bar */
-        .status-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 20px 6px; font-size: 15px; font-weight: 600;
-        }
-        .status-bar-icons { display: flex; align-items: center; gap: 5px; }
-        .status-bar-icons svg { width: 16px; height: 16px; }
+        /* ========== TYPOGRAPHY ========== */
+        .h1 { font-weight: 900; font-size: 40px; line-height: 44px; letter-spacing: -0.6px; }
+        .h1-detail { font-weight: 900; font-size: 32px; line-height: 36px; letter-spacing: -0.48px; }
+        .h2 { font-weight: 900; font-size: 26px; line-height: 30px; letter-spacing: -0.325px; }
+        .h3 { font-weight: 700; font-size: 20px; line-height: 24px; letter-spacing: -0.2px; }
+        .h4 { font-weight: 700; font-size: 16px; line-height: 20px; }
+        .h5 { font-weight: 500; font-size: 14px; line-height: 18px; }
+        .p1 { font-weight: 400; font-size: 16px; line-height: 20px; }
+        .p1-air { font-weight: 400; font-size: 16px; line-height: 24px; }
+        .p2 { font-weight: 400; font-size: 14px; line-height: 18px; }
+        .caption { font-weight: 400; font-size: 12px; line-height: 16px; letter-spacing: -0.05px; }
+        .btn-text { font-weight: 500; font-size: 14px; line-height: 18px; letter-spacing: 0.42px; }
+        .btn2-text { font-weight: 700; font-size: 12px; line-height: 16px; letter-spacing: 0.36px; }
 
-        /* Common back button */
-        .back-btn {
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            background: none; border: none; cursor: pointer; color: #1a1a1a;
-            border-radius: 50%; flex-shrink: 0; font-size: 0;
+        /* ========== STATUS TAGS ========== */
+        .status-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            padding: 4px 6px;
+            border-radius: var(--radius-4);
+            font-weight: 700;
+            font-size: 12px;
+            line-height: 16px;
+            letter-spacing: 0.36px;
+            white-space: nowrap;
         }
-        .back-btn:active { background: rgba(0,0,0,0.05); }
-        .back-btn svg { width: 24px; height: 24px; }
-        .close-btn {
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            background: none; border: none; cursor: pointer; color: #1a1a1a;
-            border-radius: 50%; flex-shrink: 0; font-size: 0;
-        }
-        .close-btn:active { background: rgba(0,0,0,0.05); }
-        .close-btn svg { width: 24px; height: 24px; }
+        .status-tag.silver { background: var(--color-silver-extralight); color: var(--color-silver); }
+        .status-tag.warning { background: var(--color-warning-extralight); color: var(--color-warning); }
+        .status-tag.error { background: var(--color-error-extralight); color: var(--color-error); }
+        .status-tag.success { background: var(--color-success); color: var(--color-text-contrast); }
+        .status-tag.success-check { background: var(--color-success); color: var(--color-text-contrast); }
+        .status-tag.superb { background: var(--color-superb-extralight); color: var(--color-superb); }
+        .status-tag.course { background: var(--color-course-extralight); color: var(--color-course); }
+        .status-tag.error-solid { background: var(--color-error); color: var(--color-text-contrast); }
+        .status-tag.outline { background: var(--color-bg); border: 1px solid var(--color-border); color: var(--color-text-secondary); }
+        .status-tag svg, .status-tag i { width: 16px; height: 16px; flex-shrink: 0; }
+        .status-tag i { font-size: 16px; line-height: 1; }
+        .status-tag.xl { padding: 8px 10px; font-size: 20px; font-weight: 700; line-height: 24px; letter-spacing: -0.2px; border-radius: var(--radius-4); }
 
-        /* Mini status badges (colored squares with numbers) */
-        .status-badges { display: flex; gap: 5px; flex-wrap: wrap; }
-        .status-badge {
-            display: inline-flex; align-items: center; gap: 3px;
-            padding: 3px 7px; border-radius: 6px;
-            font-size: 12px; font-weight: 700; line-height: 1;
+        /* ========== BADGES ========== */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 6px;
+            border-radius: var(--radius-4);
+            font-weight: 700;
+            font-size: 12px;
+            line-height: 16px;
+            letter-spacing: 0.36px;
+            white-space: nowrap;
         }
-        .status-badge .badge-num {
-            font-size: 13px; font-weight: 800;
-        }
-        .status-badge .badge-icon { font-size: 11px; }
-        .badge-pending { background: #FFF3E0; color: #FF9800; }
-        .badge-blocked { background: #FFEBEE; color: #EF5350; }
-        .badge-done { background: #E8F5E9; color: #4CAF50; }
-        .badge-review { background: #E3F2FD; color: #42A5F5; }
-        .badge-gray { background: #EEEEEE; color: #9E9E9E; }
+        .badge.warning { background: var(--color-warning-extralight); color: var(--color-warning); }
+        .badge.error { background: var(--color-error-extralight); color: var(--color-error); }
+        .badge.success { background: var(--color-success-extralight); color: var(--color-success); }
+        .badge.course { background: var(--color-course-extralight); color: var(--color-course); }
 
-        /* Tags */
-        .tag {
-            display: inline-flex; align-items: center; padding: 4px 12px;
-            border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.3px;
-            white-space: nowrap; text-transform: uppercase;
+        /* ========== TAB SYSTEM ========== */
+        .tab-system { display: flex; gap: 8px; align-items: center; }
+        .tab-item {
+            display: flex; align-items: center; gap: 4px;
+            height: 32px; padding: 8px; border-radius: var(--radius-8);
+            background: var(--color-bg-filled); color: var(--color-text-primary);
+            font-size: 14px; line-height: 18px; white-space: nowrap;
         }
-        .tag-yellow { background: #FFF8E1; color: #F9A825; border: 1.5px solid #FFE082; }
-        .tag-gray { background: #F5F5F5; color: #9E9E9E; border: 1.5px solid #E0E0E0; }
-        .tag-green { background: #E8F5E9; color: #4CAF50; border: 1.5px solid #A5D6A7; }
-        .tag-blue { background: #E3F2FD; color: #2196F3; border: 1.5px solid #90CAF9; }
-        .tag-orange { background: #FFE0B2; color: #E65100; }
-        .tag-pink { background: #FCE4EC; color: #E91E63; }
+        .tab-item.active { background: #fe5d26; color: var(--color-text-contrast); }
+        .tab-item svg, .tab-item i { width: 20px; height: 20px; }
+        .tab-item i { font-size: 20px; line-height: 1; }
 
-        /* Buttons */
+        /* ========== BUTTONS ========== */
         .btn-primary {
             display: flex; align-items: center; justify-content: center;
-            width: 100%; height: 52px; background: #29B6F6; color: #fff;
-            border: none; border-radius: 28px; font-size: 15px; font-weight: 700;
-            cursor: pointer; letter-spacing: 0.8px; transition: background 0.2s;
-            text-transform: uppercase;
+            height: 48px; padding: 11px 16px; border-radius: var(--radius-8);
+            background: var(--color-accent); color: var(--color-text-contrast);
+            font-weight: 500; font-size: 14px; letter-spacing: 0.42px;
+            width: 100%;
         }
-        .btn-primary:active { background: #0288D1; }
-        .btn-primary:disabled { background: #E0E0E0; cursor: not-allowed; }
-        .btn-confirm {
+        .btn-secondary {
             display: flex; align-items: center; justify-content: center;
-            width: 100%; height: 52px;
-            background: linear-gradient(135deg, #26C6DA 0%, #29B6F6 100%);
-            color: #fff; border: none; border-radius: 28px; font-size: 15px; font-weight: 700;
-            cursor: pointer; letter-spacing: 0.8px; text-transform: uppercase;
+            height: 48px; padding: 11px 16px; border-radius: var(--radius-8);
+            background: var(--color-bg-filled); color: var(--color-text-primary);
+            font-weight: 500; font-size: 14px; letter-spacing: 0.42px;
+            width: 100%;
         }
-        .btn-confirm:active { opacity: 0.9; }
-        .btn-cancel {
+        .btn-error-hold {
             display: flex; align-items: center; justify-content: center;
-            width: 100%; height: 48px; background: #F5F5F5; color: #757575;
-            border: none; border-radius: 28px; font-size: 14px; font-weight: 600;
-            cursor: pointer; letter-spacing: 0.5px; text-transform: uppercase;
+            height: 48px; padding: 4px 8px; border-radius: 6px;
+            background: var(--color-error); color: var(--color-text-contrast);
+            font-weight: 500; font-size: 14px; letter-spacing: 0.42px;
+            width: 100%; position: relative; overflow: hidden;
+            user-select: none; -webkit-user-select: none;
         }
-        .btn-danger {
+        .btn-error-hold .hold-bar {
+            position: absolute; left: 4px; top: 4px; bottom: 4px;
+            width: 0; background: rgba(0,0,0,0.16); border-radius: var(--radius-4);
+            transition: width 0.05s linear;
+        }
+        .btn-icon {
             display: flex; align-items: center; justify-content: center;
-            width: 100%; height: 52px; background: #EF5350; color: #fff;
-            border: none; border-radius: 28px; font-size: 15px; font-weight: 700;
-            cursor: pointer; letter-spacing: 0.8px; text-transform: uppercase;
+            width: 32px; height: 32px; border-radius: var(--radius-8);
+            flex-shrink: 0;
         }
-        .btn-danger:active { background: #D32F2F; }
+        .btn-icon-lg {
+            display: flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; border-radius: var(--radius-8);
+            flex-shrink: 0;
+        }
+        .btn-icon svg, .btn-icon-lg svg, .btn-icon i, .btn-icon-lg i { width: 24px; height: 24px; }
+        .btn-icon i, .btn-icon-lg i { font-size: 24px; line-height: 1; }
 
-        /* AI icon */
-        .ai-icon {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF9800 100%);
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 12px; font-weight: 900; flex-shrink: 0;
-            letter-spacing: -0.5px;
-        }
+        /* ========== ICON HELPERS ========== */
+        .icon-20 { width: 20px; height: 20px; flex-shrink: 0; }
+        .icon-24 { width: 24px; height: 24px; flex-shrink: 0; }
+        .icon-32 { width: 32px; height: 32px; flex-shrink: 0; }
+        .icon-64 { width: 64px; height: 64px; flex-shrink: 0; }
 
-        /* ============ SCREEN 1: Campaigns ============ */
-        #screen-campaigns { z-index: 1; }
-        .campaigns-header { padding: 20px 20px 0; }
-        .campaigns-header-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
-        .campaigns-header-icon {
-            width: 40px; height: 40px; border-radius: 10px;
-            overflow: hidden; flex-shrink: 0;
+        /* ========== AI TAG ========== */
+        .tag-ai {
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: var(--radius-32); overflow: hidden; position: relative;
+            background: linear-gradient(135deg, #55128A 0%, #fa1859 40%, #fc8760 70%, #fdac62 100%);
+            color: white; font-weight: 900; font-family: var(--font);
+            user-select: none; flex-shrink: 0;
         }
-        .campaigns-header-icon img { width: 100%; height: 100%; object-fit: cover; }
-        .campaigns-title {
-            font-size: 34px; font-weight: 900; line-height: 1.05;
-            letter-spacing: -0.5px; color: #1a1a1a;
-        }
-        .campaigns-subtitle {
-            font-size: 14px; color: #9E9E9E; margin-top: 6px; line-height: 1.4;
-        }
-        .campaigns-tabs {
-            display: flex; gap: 0; margin: 20px 20px 16px;
-            background: #F5F5F5; border-radius: 12px; padding: 3px;
-        }
-        .campaigns-tab {
-            flex: 1; padding: 9px 8px; text-align: center; font-size: 13px; font-weight: 600;
-            border-radius: 10px; cursor: pointer; transition: all 0.2s; color: #9E9E9E;
-            border: none; background: none;
-        }
-        .campaigns-tab.active { background: #fff; color: #1a1a1a; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .campaigns-list { padding: 0 20px 32px; display: flex; flex-direction: column; gap: 14px; }
+        .tag-ai.sm { height: 20px; width: 20px; font-size: 8px; letter-spacing: 0.5px; }
+        .tag-ai.xl { height: 48px; width: 48px; font-size: 16px; letter-spacing: 0.5px; }
 
-        /* Campaign card */
+        /* ========== CAMPAIGN CARD ========== */
         .campaign-card {
-            border-radius: 16px; overflow: hidden; position: relative;
-            height: 180px; display: flex; flex-direction: column; justify-content: flex-end;
-            cursor: pointer; transition: transform 0.15s;
+            position: relative; border-radius: var(--radius-16);
+            height: 224px; overflow: hidden; box-shadow: var(--shadow-md);
+            cursor: pointer; flex: 1 0 0; min-width: 250px;
         }
-        .campaign-card:active { transform: scale(0.98); }
-        .campaign-card-bg {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-size: cover; background-position: center;
-            border-radius: 16px;
+        .campaign-card img.cover {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; pointer-events: none;
         }
-        .campaign-card-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.0) 55%);
-            border-radius: 16px;
+        .campaign-card .card-body {
+            position: relative; z-index: 1; display: flex; flex-direction: column;
+            justify-content: space-between; align-items: flex-end;
+            height: 100%; padding: 24px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 45%, rgba(0,0,0,0.5) 100%);
         }
-        .campaign-card-content {
-            position: relative; padding: 14px 16px; z-index: 1;
+        .campaign-card .card-top { display: flex; gap: 16px; align-items: flex-start; justify-content: center; width: 100%; }
+        .campaign-card .card-tags { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
+        .campaign-card .card-bottom { width: 100%; }
+        .campaign-card .card-title {
+            font-weight: 900; font-size: 26px; line-height: 30px;
+            letter-spacing: -0.325px; color: var(--color-text-contrast);
+            text-shadow: 0px 0px 1px rgba(0,0,0,0.5);
+            overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
         }
-        .campaign-card-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
-        .campaign-card-title {
-            font-size: 22px; font-weight: 800; color: #fff; line-height: 1.15;
-            margin-bottom: 4px; letter-spacing: -0.3px;
+        .campaign-card .card-dates {
+            display: flex; gap: 8px; align-items: center; margin-top: 4px;
+            font-size: 12px; color: var(--color-text-contrast);
+            text-shadow: 0px 0px 1px rgba(0,0,0,0.5);
         }
-        .campaign-card-date {
-            font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 500;
-            display: flex; align-items: center; gap: 6px;
+        .campaign-card .card-dates svg, .campaign-card .card-dates i { width: 16px; height: 16px; opacity: 0.8; }
+        .campaign-card .card-dates i { font-size: 16px; line-height: 1; }
+        .campaign-card .progress-ring {
+            width: 24px; height: 24px; flex-shrink: 0;
         }
-        .campaign-card-date .arrow { font-size: 10px; }
+        .campaign-card .progress-ring circle {
+            fill: none; stroke-width: 3;
+        }
+        .campaign-card .progress-ring .bg { stroke: rgba(255,255,255,0.3); }
+        .campaign-card .progress-ring .fg { stroke: var(--color-accent); stroke-linecap: round;
+            transform: rotate(-90deg); transform-origin: center; }
 
-        /* ============ SCREEN 2: Campaign Detail ============ */
-        .campaign-detail-hero {
-            position: relative; height: 240px; display: flex; flex-direction: column;
-            justify-content: flex-end;
-        }
-        .campaign-detail-hero-bg {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-size: cover; background-position: center;
-        }
-        .campaign-detail-hero-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.0) 60%);
-        }
-        .campaign-detail-hero-content { position: relative; z-index: 1; padding: 16px 20px; }
-        .campaign-detail-hero .back-btn {
-            position: absolute; top: 12px; left: 12px; z-index: 2; color: #fff;
-        }
-        .campaign-detail-hero .back-btn svg { fill: #fff; }
-        .campaign-detail-tags { display: flex; gap: 5px; flex-wrap: wrap; }
-        .campaign-detail-body { padding: 16px 20px 24px; }
-        .campaign-detail-date {
-            font-size: 12px; color: #9E9E9E; font-weight: 500; margin-bottom: 8px;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .campaign-detail-date .arrow { font-size: 10px; }
-        .campaign-detail-title {
-            font-size: 28px; font-weight: 900; line-height: 1.1; margin-bottom: 10px;
-            letter-spacing: -0.5px;
-        }
-        .campaign-detail-desc {
-            font-size: 15px; color: #757575; line-height: 1.5; margin-bottom: 20px;
-        }
-        /* Text-based tabs for campaign detail */
-        .detail-tabs {
-            display: flex; gap: 24px; margin-bottom: 20px;
-            border-bottom: 1px solid #F0F0F0; padding-bottom: 0;
-        }
-        .detail-tab {
-            padding: 8px 0; font-size: 15px; font-weight: 600;
-            cursor: pointer; color: #BDBDBD; border: none; background: none;
-            border-bottom: 2px solid transparent; margin-bottom: -1px;
-            transition: all 0.2s;
-        }
-        .detail-tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
-        .detail-tab .tab-count { color: #29B6F6; }
-
-        /* Task card in campaign detail */
+        /* ========== TASK CARD ========== */
         .task-card {
-            background: #fff; border-radius: 16px; padding: 20px;
-            margin-bottom: 16px; cursor: pointer; transition: transform 0.15s;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
-            border: 1px solid #F5F5F5;
+            background: var(--color-bg-filled); border-radius: var(--radius-24);
+            padding: 24px; box-shadow: var(--shadow-md);
+            display: flex; flex-direction: column; gap: 16px;
+            cursor: pointer;
         }
-        .task-card:active { transform: scale(0.98); }
-        .task-card.disabled { opacity: 0.55; cursor: default; }
-        .task-card.disabled:active { transform: none; }
-        .task-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-        .task-card-date-pill {
-            font-size: 11px; color: #9E9E9E; font-weight: 500;
-            background: #F5F5F5; padding: 4px 10px; border-radius: 20px;
+        .task-card .tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .task-card .task-title { font-weight: 700; font-size: 20px; line-height: 24px; letter-spacing: -0.2px; }
+        .task-card .task-desc {
+            font-size: 16px; line-height: 20px; color: var(--color-text-primary);
+            overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
         }
-        .task-card-title {
-            font-size: 22px; font-weight: 800; margin-bottom: 10px;
-            line-height: 1.2; letter-spacing: -0.3px;
+        .task-card .icon-row { display: flex; gap: 20px; align-items: center; }
+        .task-card .icon-row .item { display: flex; gap: 5px; align-items: center; font-weight: 500; font-size: 14px; }
+        .task-card .icon-row .item svg, .task-card .icon-row .item i { width: 20px; height: 20px; color: var(--color-text-primary); }
+        .task-card .icon-row .item i { font-size: 20px; line-height: 1; }
+        .task-card .badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .task-card .steps-list { display: flex; flex-direction: column; }
+        .task-card .step-item {
+            display: flex; gap: 16px; align-items: flex-start; padding: 16px 0;
         }
-        .task-card-meta {
-            display: flex; align-items: center; gap: 16px; font-size: 14px;
-            color: #757575; margin-bottom: 14px;
+        .task-card .step-item svg, .task-card .step-item i { width: 24px; height: 24px; flex-shrink: 0; color: var(--color-silver); }
+        .task-card .step-item i { font-size: 24px; line-height: 1; }
+        .task-card .step-item .step-text { font-size: 16px; line-height: 20px; padding-top: 2px; }
+        .task-card .superb-banner {
+            background: var(--color-superb-extralight); color: var(--color-superb);
+            text-align: center; padding: 4px 6px; border-radius: var(--radius-4);
+            font-weight: 700; font-size: 12px; letter-spacing: 0.36px;
         }
-        .task-card-meta-item { display: flex; align-items: center; gap: 5px; }
-        .task-card-meta-item svg { width: 18px; height: 18px; fill: #757575; }
-        .task-card-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-        .task-card-steps { margin-bottom: 16px; }
-        .task-card-step {
-            display: flex; align-items: flex-start; gap: 14px; padding: 10px 0;
-            font-size: 16px; color: #424242; line-height: 1.4;
+        .task-card .reviewer-row {
+            display: flex; gap: 16px; align-items: center; padding-top: 16px;
+            border-top: 2px solid var(--color-border-contrast);
         }
-        .task-card-step-dot {
-            width: 10px; height: 10px; border-radius: 50%; background: #E0E0E0;
-            flex-shrink: 0; margin-top: 6px;
-        }
-        .task-card-cta {
-            display: flex; align-items: center; justify-content: center;
-            padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600;
-            color: #29B6F6; margin-bottom: 16px; letter-spacing: 0.2px;
-            background: linear-gradient(135deg, rgba(38,198,218,0.12) 0%, rgba(41,182,246,0.12) 100%);
-            font-style: italic;
-        }
-        .task-card-divider { height: 1px; background: #F0F0F0; margin-bottom: 14px; }
-        .task-card-footer {
-            display: flex; align-items: center; gap: 10px;
-        }
-        .task-card-footer-icon { display: flex; align-items: center; }
-        .task-card-footer-icon svg { width: 28px; height: 28px; }
-        .task-card-footer-text { font-size: 14px; }
-        .task-card-footer-text strong { font-weight: 700; color: #1a1a1a; }
-        .task-card-footer-text span { color: #9E9E9E; font-size: 13px; }
+        .task-card .reviewer-row svg, .task-card .reviewer-row i { width: 32px; height: 32px; flex-shrink: 0; color: var(--color-text-primary); }
+        .task-card .reviewer-row i { font-size: 32px; line-height: 1; }
+        .task-card .reviewer-row .info { flex: 1; }
+        .task-card .reviewer-row .info .label { font-weight: 500; font-size: 14px; }
+        .task-card .reviewer-row .info .sub { font-size: 12px; color: var(--color-text-secondary); }
 
-        /* ============ SCREEN 3: Task Page ============ */
-        .task-page-header {
-            display: flex; align-items: center; padding: 10px 16px; gap: 8px;
+        /* ========== INFO ROWS (TaskPage) ========== */
+        .info-row {
+            display: flex; align-items: center; gap: 24px;
+            padding: 16px 24px; min-height: 72px;
+            border-top: 2px solid var(--color-border);
         }
-        .task-page-timer {
-            display: flex; align-items: center; gap: 4px; margin-left: auto;
+        .info-row .row-icon { width: 32px; height: 32px; flex-shrink: 0; }
+        .info-row .row-body { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+        .info-row .row-label { font-weight: 500; font-size: 14px; line-height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .info-row .row-sub { font-size: 12px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 8px; }
+        .info-row .row-sub svg, .info-row .row-sub i { width: 16px; height: 16px; }
+        .info-row .row-sub i { font-size: 16px; line-height: 1; }
+        .info-row .row-action { flex-shrink: 0; }
+        .info-row .date-range { display: flex; align-items: center; gap: 12px; flex: 1; }
+        .info-row .date-col { display: flex; flex-wrap: wrap; gap: 0 8px; max-width: 120px; font-size: 14px; }
+        .info-row .date-col .date-val { font-weight: 500; }
+        .info-row .date-col .date-time { color: var(--color-text-secondary); }
+        .info-row .campaign-thumb {
+            width: 60px; height: 40px; border-radius: var(--radius-4);
+            object-fit: cover; box-shadow: var(--shadow-md); flex-shrink: 0;
         }
-        .task-page-timer-val {
-            font-size: 15px; font-weight: 700; background: #F5F5F5; padding: 5px 12px;
-            border-radius: 8px; color: #1a1a1a;
+
+        /* ========== COLLAPSIBLE SECTIONS ========== */
+        .collapsible-section { border-top: 2px solid var(--color-border); }
+        .collapsible-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 24px 24px 16px; cursor: pointer;
         }
-        .task-page-timer svg { width: 20px; height: 20px; fill: #757575; }
-        .task-page-body { padding: 0 20px 120px; }
-        .task-page-estimate { font-size: 13px; color: #9E9E9E; margin-bottom: 6px; }
-        .task-page-title {
-            font-size: 30px; font-weight: 900; line-height: 1.1; margin-bottom: 12px;
-            letter-spacing: -0.5px;
-        }
-        .task-page-desc {
-            font-size: 15px; color: #757575; line-height: 1.5; margin-bottom: 20px;
-        }
-        .task-page-campaign-ref {
-            display: flex; align-items: center; gap: 12px; padding: 12px;
-            background: #F9F9F9; border-radius: 12px; margin-bottom: 16px;
-        }
-        .task-page-campaign-thumb {
-            width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;
-            background-size: cover; background-position: center;
-        }
-        .task-page-campaign-ref-title { font-size: 14px; font-weight: 700; }
-        .task-page-campaign-ref-date { font-size: 12px; color: #9E9E9E; }
-        .task-page-schedule {
-            display: flex; align-items: center; gap: 8px; font-size: 14px;
-            color: #757575; margin-bottom: 16px;
-        }
-        .task-page-schedule svg { width: 18px; height: 18px; fill: #757575; }
-        .task-page-review {
-            display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
-        }
-        .task-page-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-        .task-page-avatars {
-            display: flex; align-items: center; margin-bottom: 28px;
-        }
-        .avatar-circle {
-            width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff;
-            margin-left: -8px; display: flex; align-items: center; justify-content: center;
-            font-size: 10px; font-weight: 700; color: #fff;
-        }
-        .avatar-circle:first-child { margin-left: 0; }
-        .avatar-count { margin-left: 8px; font-size: 13px; color: #9E9E9E; font-weight: 500; }
-        .section-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.2px; }
-        .step-item {
-            display: flex; align-items: center; gap: 12px; padding: 14px 0;
-            border-bottom: 1px solid #F5F5F5; font-size: 15px; color: #424242;
-        }
-        .step-checkbox {
-            width: 22px; height: 22px; border-radius: 6px; border: 2px solid #D0D0D0;
-            flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
-        }
-        .step-checkbox.checked { background: #29B6F6; border-color: #29B6F6; }
-        .step-checkbox.checked::after { content: '✓'; color: #fff; font-size: 13px; font-weight: 700; }
+        .collapsible-header .title { font-weight: 700; font-size: 20px; line-height: 24px; letter-spacing: -0.2px; }
+        .collapsible-header .chevron { width: 20px; height: 20px; transition: transform 0.3s; font-size: 20px; line-height: 1; }
+        .collapsible-header.collapsed .chevron { transform: rotate(180deg); }
+        .collapsible-body { padding: 0 24px 8px; }
+        .collapsible-body.hidden { display: none; }
+
+        /* ========== DELIVERABLE ITEM ========== */
         .deliverable-item {
-            display: flex; align-items: center; gap: 12px; padding: 14px 0;
-            border-bottom: 1px solid #F5F5F5; cursor: pointer;
+            display: flex; align-items: center; gap: 16px; padding: 16px 0; cursor: pointer;
         }
-        .deliverable-item:active { background: #FAFAFA; }
-        .deliverable-icon {
-            width: 44px; height: 44px; border-radius: 10px; background: #F5F5F5;
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-            font-size: 20px;
-        }
-        .deliverable-icon.done { background: #E3F2FD; }
-        .deliverable-info { flex: 1; }
-        .deliverable-title { font-size: 15px; font-weight: 600; color: #1a1a1a; }
-        .deliverable-subtitle { font-size: 12px; color: #9E9E9E; margin-top: 2px; }
-        .deliverable-arrow { color: #BDBDBD; font-size: 18px; font-weight: 300; }
-        .deliverable-thumb {
-            width: 44px; height: 44px; border-radius: 8px; object-fit: cover;
-        }
-        .task-page-bottom {
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-            max-width: 414px; width: 100%; padding: 16px 20px 24px;
-            background: linear-gradient(to top, #fff 70%, rgba(255,255,255,0));
-            z-index: 10;
+        .deliverable-item .del-check { width: 24px; height: 24px; flex-shrink: 0; }
+        .deliverable-item .del-thumb { width: 48px; height: 48px; border-radius: var(--radius-4); object-fit: cover; flex-shrink: 0; }
+        .deliverable-item .del-info { flex: 1; min-width: 0; }
+        .deliverable-item .del-title { font-size: 16px; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .deliverable-item .del-sub { font-size: 14px; line-height: 18px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .deliverable-item .del-arrow { width: 20px; height: 20px; flex-shrink: 0; color: var(--color-text-secondary); }
+
+        /* ========== TASK FOOTER ========== */
+        .task-footer {
+            padding: 24px; border-top: 2px solid var(--color-border);
+            background: var(--color-bg);
         }
         .slider-btn {
-            width: 100%; height: 52px; background: #E0E0E0; border-radius: 28px;
             position: relative; display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.8px;
-            overflow: hidden; user-select: none; text-transform: uppercase;
+            height: 64px; border-radius: var(--radius-24);
+            background: var(--color-bg-filled); overflow: hidden;
+            user-select: none; -webkit-user-select: none;
         }
-        .slider-btn.enabled { background: #29B6F6; }
+        .slider-btn .slider-label {
+            font-weight: 700; font-size: 16px; color: var(--color-text-tertiary);
+        }
+        .slider-btn .slider-thumb {
+            position: absolute; left: 4px; top: 4px;
+            width: 56px; height: 56px; border-radius: 20px;
+            background: rgba(255,255,255,0.66);
+            display: flex; align-items: center; justify-content: center;
+            cursor: grab; touch-action: none;
+        }
+        .slider-btn .slider-thumb:active { cursor: grabbing; }
+        .slider-btn .slider-thumb svg, .slider-btn .slider-thumb i { width: 32px; height: 32px; color: var(--color-text-tertiary); }
+        .slider-btn .slider-thumb i { font-size: 32px; line-height: 1; }
+        .slider-btn.unlocked { background: var(--color-success); }
+        .slider-btn.unlocked .slider-label { color: var(--color-text-contrast); }
 
-        /* ============ SCREEN 4: Deliverable Detail ============ */
-        .screen-header {
-            display: flex; align-items: center; padding: 8px 16px; gap: 8px;
+        /* ========== STACKED AVATARS ========== */
+        .stacked-avatars { display: flex; align-items: center; padding-right: 9px; flex-shrink: 0; }
+        .stacked-avatars .avatar-wrap {
+            width: 24px; height: 24px; border-radius: 50%;
+            border: 2px solid white; margin-right: -9px;
+            overflow: hidden; flex-shrink: 0;
         }
-        .deliv-detail-body { padding: 0 20px 32px; }
-        .deliv-detail-title {
-            font-size: 28px; font-weight: 900; line-height: 1.1; margin-bottom: 8px;
-            letter-spacing: -0.5px;
+        .stacked-avatars .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .stacked-avatars .avatar-count {
+            display: flex; align-items: center; justify-content: center;
+            min-width: 32px; height: 24px; border-radius: 64px;
+            background: var(--color-client); color: white;
+            font-weight: 500; font-size: 14px;
+            border: 2px solid white; margin-right: -9px;
+            padding: 0 8px;
         }
-        .deliv-detail-subtitle {
-            font-size: 14px; color: #9E9E9E; line-height: 1.5; margin-bottom: 20px;
-        }
-        .deliv-ref-image {
-            width: 100%; border-radius: 16px; aspect-ratio: 4/3; object-fit: cover;
-            margin-bottom: 20px;
-        }
-        .deliv-ref-placeholder {
-            width: 100%; border-radius: 16px; aspect-ratio: 4/3;
-            background: linear-gradient(135deg, #E0F7FA 0%, #B2EBF2 50%, #80DEEA 100%);
-            margin-bottom: 20px; display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-        }
-        .deliv-ref-placeholder img {
-            width: 60%; height: auto; object-fit: contain;
-        }
-        .info-card {
-            background: #F9F9F9; border-radius: 16px; padding: 18px; margin-bottom: 24px;
-        }
-        .info-card-title {
-            font-size: 15px; font-weight: 700; margin-bottom: 12px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .info-card-title svg { width: 20px; height: 20px; fill: #29B6F6; }
-        .info-card-item {
-            display: flex; align-items: flex-start; gap: 10px; padding: 5px 0;
-            font-size: 14px; color: #616161; line-height: 1.5;
-        }
-        .info-card-bullet { color: #1a1a1a; flex-shrink: 0; margin-top: 1px; }
 
-        /* Delivery section */
-        .delivery-section {
-            margin-top: 16px; padding: 16px; background: #F9F9F9; border-radius: 16px;
-        }
-        .delivery-section-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
-        .delivery-photo-row { display: flex; align-items: center; gap: 12px; }
-        .delivery-photo-thumb { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
-        .delivery-photo-info { font-size: 14px; color: #757575; }
-        .delivery-photo-name { font-weight: 600; color: #1a1a1a; }
-
-        /* ============ SCREEN 5+: Upload Modal ============ */
+        /* ========== MODAL / BOTTOM SHEET ========== */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.35); z-index: 100;
-            opacity: 0; transition: opacity 0.3s; pointer-events: none;
+            background: rgba(0,0,0,0.5); z-index: 100;
+            display: flex; align-items: flex-end; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
         }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-drawer {
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%);
-            max-width: 414px; width: 100%; background: #fff;
-            border-radius: 20px 20px 0 0; z-index: 101;
-            transition: transform 0.35s cubic-bezier(.4,0,.2,1);
-            max-height: 92vh; overflow-y: auto;
+        .modal-sheet {
+            background: white; width: 100%; max-width: 414px;
+            border-radius: var(--radius-32) var(--radius-32) 0 0;
+            height: calc(100vh - 10px); max-height: calc(100vh - 10px); overflow: hidden;
+            transform: translateY(100%); transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+            box-shadow: var(--shadow-md);
         }
-        .modal-drawer.active { transform: translateX(-50%) translateY(0); }
-        .modal-handle {
-            width: 36px; height: 4px; background: #E0E0E0; border-radius: 2px;
-            margin: 12px auto 0;
+        .modal-overlay.active .modal-sheet { transform: translateY(0); }
+        .modal-center {
+            background: white; width: calc(100% - 48px); max-width: 382px;
+            border-radius: var(--radius-16); box-shadow: var(--shadow-md);
+            padding: 64px 32px 32px; text-align: center;
+            transform: scale(0.9); opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
         }
-        .modal-body { padding: 20px 20px 28px; }
-        .modal-title {
-            font-size: 28px; font-weight: 900; line-height: 1.1; margin-bottom: 6px;
-            letter-spacing: -0.5px;
-        }
-        .modal-subtitle { font-size: 14px; color: #9E9E9E; margin-bottom: 20px; }
+        .modal-overlay.active .modal-center { transform: scale(1); opacity: 1; }
+        .modal-overlay.center-modal { align-items: center; }
 
-        /* AI bubble */
+        /* ========== AI ANALYSIS MODAL ========== */
+        #ai-sheet {
+            height: 100%;
+        }
+        #ai-sheet > #ai-state-upload {
+            height: 100%;
+        }
+        .ai-modal-body { padding: 32px; display: flex; flex-direction: column; height: 100%; overflow-y: auto; }
+        .ai-modal-header {
+            text-align: center; overflow: hidden; margin-bottom: 32px;
+            max-height: 80px;
+            transition: max-height 0.6s cubic-bezier(.4,0,.2,1), opacity 0.4s ease, margin-bottom 0.6s cubic-bezier(.4,0,.2,1);
+        }
+        .ai-modal-header.collapsed { max-height: 0; opacity: 0; margin-bottom: 0; }
+        .ai-modal-header .ai-title { font-weight: 900; font-size: 32px; line-height: 36px; letter-spacing: -0.48px; }
+        .ai-modal-header .ai-subtitle { font-size: 14px; color: var(--color-text-secondary); margin-top: 4px; }
+
+        /* AI Welcome — starts at height 0, expands to push content down */
+        .ai-welcome-wrapper {
+            height: 0; overflow: visible; position: relative;
+            transition: height 0.5s cubic-bezier(.4,0,.2,1), margin-bottom 0.6s cubic-bezier(.4,0,.2,1);
+            margin-bottom: 0;
+        }
+        .ai-welcome-wrapper.open {
+            height: 56px; margin-bottom: 32px;
+        }
+        .ai-welcome-wrapper.open-full {
+            height: 110px; margin-bottom: 32px;
+        }
+        .ai-welcome-wrapper.collapsed {
+            height: 0 !important; margin-bottom: 0 !important; overflow: hidden;
+        }
+        .ai-welcome { display: flex; gap: 12px; align-items: flex-start; }
+        .ai-welcome .ai-bubble-welcome {
+            background: var(--color-ai-extralight); padding: 12px 16px;
+            border-radius: var(--radius-8) var(--radius-24) var(--radius-24) var(--radius-24);
+            font-weight: 700; font-size: 16px; line-height: 20px; color: var(--color-ai);
+            max-width: 230px;
+        }
+        /* AI icon — starts invisible, pops in as it pushes */
+        #ai-welcome-icon {
+            transform: scale(0); opacity: 0;
+            transition: transform 0.5s cubic-bezier(.34,1.56,.64,1), opacity 0.2s ease;
+        }
+        #ai-welcome-icon.pop-in { transform: scale(1); opacity: 1; }
+        /* AI welcome content (typing + text) — slides from left */
+        #ai-welcome-content {
+            transform: translateX(-12px); opacity: 0;
+            transition: transform 0.4s cubic-bezier(.4,0,.2,1), opacity 0.4s ease;
+        }
+        #ai-welcome-content.slide-in { transform: translateX(0); opacity: 1; }
+        /* AI icon bounce (gives it life) */
+        .tag-ai.bounce {
+            animation: aiIconBounce 0.6s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes aiIconBounce {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        /* Idle breathing animation for the AI icon */
+        .tag-ai.breathing {
+            animation: aiBreathe 3s ease-in-out infinite;
+        }
+        @keyframes aiBreathe {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(250,24,89,0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 0 12px 4px rgba(250,24,89,0.15); }
+        }
+        /* Bubble text expand animation */
+        .ai-bubble-welcome {
+            max-height: 0; padding: 0 16px !important; overflow: hidden; opacity: 0;
+            transition: max-height 0.5s cubic-bezier(.4,0,.2,1), padding 0.5s ease, opacity 0.3s ease;
+        }
+        .ai-bubble-welcome.expand {
+            max-height: 120px; padding: 12px 16px !important; opacity: 1;
+        }
+
+        .ai-camera-icon {
+            width: 56px; height: 56px; border-radius: 50%;
+            background: #fe5d26; color: white;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .ai-camera-icon i { font-size: 28px; line-height: 1; }
+
+        /* === UNIFIED IMAGE CONTAINER — transitions through phases === */
+        .ai-image-stage {
+            position: relative; border-radius: var(--radius-16); overflow: hidden;
+            min-height: 200px; cursor: pointer;
+            border: 2px dashed var(--color-border-contrast);
+            background: var(--color-bg);
+            display: flex; align-items: center; justify-content: center;
+            flex: 1;
+            transition: min-height 1s cubic-bezier(.4,0,.2,1), flex 1s cubic-bezier(.4,0,.2,1), border-color 0.5s ease;
+        }
+        .ai-image-stage.fullscreen {
+            min-height: calc(100vh - 80px);
+            border-color: transparent;
+        }
+        .ai-image-stage.result-size {
+            min-height: 96px; flex: 0 0 auto;
+            border-color: transparent;
+        }
+        .ai-image-stage .dropper-placeholder {
+            position: relative; z-index: 1; display: flex; flex-direction: column;
+            align-items: center; gap: 16px; padding: 40px;
+        }
+        .ai-image-stage .dropper-title { font-weight: 700; font-size: 20px; line-height: 24px; color: var(--color-text-primary); }
+        .ai-image-stage .dropper-sub { font-size: 12px; color: var(--color-text-secondary); }
+        .ai-image-stage img {
+            position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+            opacity: 0; transition: opacity 0.5s ease, filter 1s ease;
+        }
+        .ai-image-stage img.visible { opacity: 1; }
+        .ai-image-stage img.grayscale { filter: grayscale(1) brightness(0.85); }
+        .ai-image-stage .verdict-overlay {
+            position: absolute; z-index: 3; bottom: 24px; left: 50%; transform: translateX(-50%);
+            opacity: 0; transition: opacity 0.5s ease;
+        }
+        .ai-image-stage .verdict-overlay.visible { opacity: 1; }
+
+        /* Analyzing glow overlay */
+        .ai-analyzing-overlay {
+            position: absolute; inset: 0; z-index: 2;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+            opacity: 0; transition: opacity 0.8s ease;
+            pointer-events: none;
+        }
+        .ai-analyzing-overlay.visible { opacity: 1; }
+        /* Main glow — big, dramatic, multicolor */
+        .ai-analyzing-overlay .glow {
+            position: absolute; width: 280px; height: 280px; border-radius: 50%;
+            background: radial-gradient(circle,
+                rgba(250,24,89,0.7) 0%,
+                rgba(252,100,60,0.5) 30%,
+                rgba(253,172,98,0.3) 50%,
+                rgba(85,18,138,0.15) 70%,
+                transparent 85%);
+            animation: glowPulse 2.5s ease-in-out infinite;
+            filter: blur(30px);
+        }
+        /* Secondary glow — orbits around */
+        .ai-analyzing-overlay .glow-orbit {
+            position: absolute; width: 120px; height: 120px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(85,18,138,0.6) 0%, rgba(250,24,89,0.3) 50%, transparent 80%);
+            filter: blur(25px);
+            animation: glowOrbit 4s linear infinite;
+        }
+        @keyframes glowOrbit {
+            0% { transform: translate(0, -60px) scale(1); opacity: 0.6; }
+            25% { transform: translate(60px, 0) scale(1.2); opacity: 0.9; }
+            50% { transform: translate(0, 60px) scale(0.8); opacity: 0.5; }
+            75% { transform: translate(-60px, 0) scale(1.1); opacity: 0.8; }
+            100% { transform: translate(0, -60px) scale(1); opacity: 0.6; }
+        }
+        @keyframes glowPulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        /* AI orb — floats with personality */
+        .ai-analyzing-overlay .ai-orb-wrapper {
+            position: relative; display: flex; align-items: center; justify-content: center;
+        }
+        .ai-analyzing-overlay .tag-ai {
+            position: relative;
+            animation: orbFloat 3s ease-in-out infinite;
+            box-shadow: 0 0 20px 8px rgba(250,24,89,0.3), 0 0 60px 20px rgba(252,135,96,0.15);
+        }
+        @keyframes orbFloat {
+            0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+            25% { transform: translateY(-8px) scale(1.08) rotate(2deg); }
+            50% { transform: translateY(-2px) scale(0.95) rotate(-1deg); }
+            75% { transform: translateY(-10px) scale(1.05) rotate(1deg); }
+        }
+        /* Orbiting particle — sparkle flying around the orb */
+        .ai-particle {
+            position: absolute; width: 6px; height: 6px; border-radius: 50%;
+            background: white;
+            box-shadow: 0 0 8px 2px rgba(255,255,255,0.8), 0 0 20px 4px rgba(252,135,96,0.5);
+            animation: particleOrbit 2.5s linear infinite;
+        }
+        .ai-particle:nth-child(2) {
+            width: 4px; height: 4px;
+            animation: particleOrbit2 3.5s linear infinite;
+            opacity: 0.7;
+            box-shadow: 0 0 6px 2px rgba(255,255,255,0.6), 0 0 14px 3px rgba(250,24,89,0.4);
+        }
+        @keyframes particleOrbit {
+            0% { transform: rotate(0deg) translateX(38px) rotate(0deg) scale(1); opacity: 0.9; }
+            50% { transform: rotate(180deg) translateX(38px) rotate(-180deg) scale(0.6); opacity: 0.5; }
+            100% { transform: rotate(360deg) translateX(38px) rotate(-360deg) scale(1); opacity: 0.9; }
+        }
+        @keyframes particleOrbit2 {
+            0% { transform: rotate(120deg) translateX(44px) rotate(-120deg) scale(0.8); opacity: 0.6; }
+            50% { transform: rotate(300deg) translateX(44px) rotate(-300deg) scale(1); opacity: 0.9; }
+            100% { transform: rotate(480deg) translateX(44px) rotate(-480deg) scale(0.8); opacity: 0.6; }
+        }
+        .ai-analyzing-overlay .ai-label {
+            position: relative; color: white; font-weight: 500; font-size: 14px;
+            text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+            transition: opacity 0.3s ease;
+            margin-top: 16px;
+        }
+
+        /* AI results section */
+        .ai-message { display: flex; flex-direction: column; gap: 12px; }
         .ai-bubble {
-            display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px;
-        }
-        .ai-bubble-box {
-            background: #FFF3E0; border-radius: 14px; padding: 12px 14px;
-            font-size: 14px; color: #E65100; line-height: 1.45; font-weight: 500;
-            position: relative; flex: 1;
-        }
-        .ai-bubble-box::before {
-            content: ''; position: absolute; left: -6px; top: 12px;
-            width: 12px; height: 12px; background: #FFF3E0;
-            transform: rotate(45deg); border-radius: 2px;
+            background: var(--color-ai-extralight); padding: 16px;
+            border-radius: var(--radius-8) var(--radius-24) var(--radius-24) var(--radius-24);
+            font-weight: 700; font-size: 20px; line-height: 24px;
+            letter-spacing: -0.2px; color: var(--color-ai);
         }
 
-        /* Upload zone */
-        .upload-zone {
-            border: 2px dashed #E0E0E0; border-radius: 16px; padding: 48px 20px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: border-color 0.2s; margin-bottom: 20px;
-            background: #FAFAFA;
+        /* Typing dots */
+        .ai-typing {
+            background: var(--color-ai-extralight); padding: 12px 16px;
+            border-radius: var(--radius-8) var(--radius-24) var(--radius-24) var(--radius-24);
+            display: inline-flex; gap: 4px; align-items: center; width: fit-content;
         }
-        .upload-zone:active { border-color: #29B6F6; background: #F5F5F5; }
-        .upload-zone-icon {
-            width: 56px; height: 56px; border-radius: 50%; background: #E1F5FE;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 14px; position: relative;
+        .ai-typing .dot {
+            width: 8px; height: 8px; border-radius: 50%; background: var(--color-ai);
+            animation: typingBounce 1.4s ease-in-out infinite;
         }
-        .upload-zone-icon svg { width: 28px; height: 28px; fill: #29B6F6; }
-        .upload-zone-icon-badge {
-            position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px;
-            border-radius: 50%; background: #29B6F6; color: #fff;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: 700;
+        .ai-typing .dot:nth-child(2) { animation-delay: 0.2s; }
+        .ai-typing .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-6px); opacity: 1; }
         }
-        .upload-zone-title { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
-        .upload-zone-sub { font-size: 13px; color: #BDBDBD; }
 
-        /* ============ Analysis Animation ============ */
-        .analysis-container {
-            position: relative; display: none; flex-direction: column; align-items: center;
+        /* Reveal animation for sequential elements */
+        .ai-reveal {
+            opacity: 0; transform: translateY(16px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
-        .analysis-container.active { display: flex; }
-        .analysis-image-wrap {
-            width: 100%; border-radius: 16px; overflow: hidden; position: relative;
-            margin-bottom: 16px;
+        .ai-reveal.visible {
+            opacity: 1; transform: translateY(0);
         }
-        .analysis-image {
-            width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block;
-            transition: filter 1s ease;
-        }
-        .analysis-image.grayscale { filter: grayscale(100%); }
-        .analysis-image-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.35); opacity: 0; transition: opacity 0.5s;
-        }
-        .analysis-image-overlay.active { opacity: 1; }
-        .analysis-glow {
-            width: 72px; height: 72px; border-radius: 50%;
-            background: linear-gradient(135deg, #FF6B6B, #FF9800);
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 22px; font-weight: 900;
-            animation: pulse-glow 1.5s ease-in-out infinite;
-            box-shadow: 0 0 30px rgba(255,107,107,0.5), 0 0 60px rgba(255,152,0,0.3);
-        }
-        @keyframes pulse-glow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); box-shadow: 0 0 50px rgba(255,107,107,0.6), 0 0 100px rgba(255,152,0,0.4); }
-        }
-        .analysis-text {
-            color: #fff; font-size: 15px; font-weight: 500; margin-top: 14px;
-            opacity: 0; transition: opacity 0.5s;
-        }
-        .analysis-text.active { opacity: 1; }
-        .analysis-badge {
-            position: absolute; bottom: 20px; right: 20px; padding: 6px 16px;
-            border-radius: 6px; font-size: 13px; font-weight: 800; letter-spacing: 0.8px;
-            opacity: 0; transform: scale(0.8); transition: all 0.4s cubic-bezier(.4,0,.2,1);
-        }
-        .analysis-badge.active { opacity: 1; transform: scale(1); }
-        .analysis-badge.good { background: #4CAF50; color: #fff; }
-        .analysis-badge.improve { background: #FFC107; color: #1a1a1a; }
-
-        /* AI verdict */
-        .ai-verdict {
-            display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px;
-            opacity: 0; transition: opacity 0.5s; width: 100%;
-        }
-        .ai-verdict.active { opacity: 1; }
-        .ai-verdict-bubble {
-            background: #FFF3E0; border-radius: 14px; padding: 12px 14px;
-            font-size: 15px; color: #E65100; line-height: 1.45; font-weight: 600;
-            font-style: italic; position: relative; flex: 1;
-        }
-        .ai-verdict-bubble::before {
-            content: ''; position: absolute; left: -6px; top: 14px;
-            width: 12px; height: 12px; background: #FFF3E0;
-            transform: rotate(45deg); border-radius: 2px;
-        }
-        .typing-cursor {
-            display: inline-block; width: 2px; height: 14px;
-            background: #E65100; animation: blink 0.7s infinite;
-            vertical-align: middle; margin-left: 2px;
-        }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         /* Feedback cards */
-        .feedback-section { margin-top: 0; width: 100%; }
-        .feedback-card {
-            background: #fff; border-radius: 14px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
-            margin-bottom: 14px; overflow: hidden; border: 1px solid #F0F0F0;
+        .ai-feedback-card {
+            background: var(--color-bg-filled); border-radius: var(--radius-24);
+            overflow: hidden; padding-top: 24px;
         }
-        .feedback-card-body { padding: 16px; }
-        .feedback-category {
-            display: inline-block; padding: 3px 10px; background: #F0F0F0;
-            color: #9E9E9E; font-size: 10px; font-weight: 700; border-radius: 4px;
-            text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.8px;
+        .ai-feedback-card .card-content { padding: 0 24px; display: flex; flex-direction: column; gap: 16px; }
+        .ai-feedback-card .kpi-tag {
+            display: inline-flex; padding: 4px; border-radius: var(--radius-4);
+            background: var(--color-silver-extralight); color: var(--color-silver);
+            font-weight: 700; font-size: 12px; line-height: 16px; letter-spacing: 0.36px;
         }
-        .feedback-desc { font-size: 15px; color: #424242; line-height: 1.5; }
-        .feedback-recommend {
-            padding: 14px 16px;
-            background: linear-gradient(135deg, #FFF8E1 0%, #FFF3E0 100%);
-            border-top: 1px solid #FFE0B2;
+        .ai-feedback-card .kpi-text { font-size: 16px; line-height: 24px; color: var(--color-text-primary); }
+        .ai-feedback-card .recommendation {
+            background: var(--color-ai-extralight); padding: 0 0 24px; margin-top: 24px;
         }
-        .feedback-recommend-header {
-            display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+        .ai-feedback-card .recommendation .ai-line {
+            height: 2px; border-radius: var(--radius-32);
+            background: linear-gradient(90deg, #55128A 0%, #fa1859 30%, #fc8760 60%, #fdac62 100%);
         }
-        .feedback-recommend-header .ai-icon { width: 22px; height: 22px; font-size: 8px; }
-        .feedback-recommend-label {
-            font-size: 11px; font-weight: 700; color: #E65100;
-            letter-spacing: 0.8px; text-transform: uppercase;
+        .ai-feedback-card .recommendation .rec-body {
+            padding: 24px 24px 0; display: flex; flex-direction: column; gap: 12px;
         }
-        .feedback-recommend-text { font-size: 14px; color: #E65100; line-height: 1.45; }
+        .ai-feedback-card .recommendation .rec-header {
+            display: flex; gap: 8px; align-items: center;
+            font-weight: 700; font-size: 16px; color: var(--color-ai);
+        }
+        .ai-feedback-card .recommendation .rec-text {
+            font-size: 16px; line-height: 24px; color: var(--color-ai);
+        }
+        .ai-actions-inline {
+            display: flex; flex-direction: column; gap: 16px;
+            margin-top: 32px; flex-shrink: 0;
+        }
+        .ai-actions-inline .btn-primary { background: #fe5d26; }
 
-        /* Utility */
-        .mb-8 { margin-bottom: 8px; }
-        .mb-16 { margin-bottom: 16px; }
-        .mb-24 { margin-bottom: 24px; }
+        /* ========== BANNER (Puntos clave) ========== */
+        .info-banner {
+            background: var(--color-bg-filled); border-radius: var(--radius-8);
+            padding: 16px; display: flex; gap: 12px;
+        }
+        .info-banner .banner-icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--color-text-secondary); margin-top: 2px; }
+        .info-banner .banner-content { flex: 1; }
+        .info-banner .banner-title { font-weight: 700; font-size: 16px; line-height: 20px; margin-bottom: 4px; }
+        .info-banner ul { margin: 0; padding-left: 24px; font-size: 16px; line-height: 24px; }
+        .info-banner ul li { margin-bottom: 8px; }
+        .info-banner ul li:last-child { margin-bottom: 0; }
+
+        /* ========== DROPDOWN OPTION ========== */
+        .dropdown-option {
+            display: flex; align-items: center; gap: 16px; padding: 12px 16px;
+            border-radius: var(--radius-8); background: var(--color-bg);
+            border: 2px solid var(--color-border);
+        }
+        .dropdown-option svg, .dropdown-option i { width: 24px; height: 24px; flex-shrink: 0; }
+        .dropdown-option i { font-size: 24px; line-height: 1; }
+        .dropdown-option .opt-body { flex: 1; }
+        .dropdown-option .opt-label { font-weight: 500; font-size: 14px; }
+        .dropdown-option .opt-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+        .btn-delete {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px; padding: 12px 16px; border-radius: var(--radius-8);
+            color: var(--color-error); font-weight: 500; font-size: 14px;
+            letter-spacing: 0.42px; width: 100%;
+        }
+
+        /* ========== UTILITY ========== */
+        .text-secondary { color: var(--color-text-secondary); }
+        .text-center { text-align: center; }
+        .w-full { width: 100%; }
+        .flex-center { display: flex; align-items: center; justify-content: center; }
+        .gap-4 { gap: 4px; } .gap-8 { gap: 8px; } .gap-12 { gap: 12px; }
+        .gap-16 { gap: 16px; } .gap-24 { gap: 24px; } .gap-32 { gap: 32px; }
+        .px-24 { padding-left: 24px; padding-right: 24px; }
+        .py-16 { padding-top: 16px; padding-bottom: 16px; }
+        .mt-auto { margin-top: auto; }
+        .hidden-input { position: absolute; width: 0; height: 0; opacity: 0; }
+
+        /* ========== ARROW SVG for dates ========== */
+        .arrow-right-sm { width: 16px; height: 16px; flex-shrink: 0; }
     </style>
 </head>
 <body>
 <div class="app-shell" id="app">
-    <!-- ======== SCREEN 1: Campaigns List ======== -->
-    <div class="screen active" id="screen-campaigns">
-        <div class="status-bar">
-            <span>9:41</span>
-            <div class="status-bar-icons">
-                <svg viewBox="0 0 24 24" fill="#1a1a1a"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
-                <svg viewBox="0 0 24 24" fill="#1a1a1a"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
-            </div>
-        </div>
-        <div class="campaigns-header">
-            <div class="campaigns-header-row">
-                <div class="campaigns-header-icon">
-                    <img src="img/header_icon.png" alt="" />
-                </div>
-            </div>
-            <div class="campaigns-title">Campañas</div>
-            <div class="campaigns-subtitle">Participa y completa tareas para eventos especiales</div>
-        </div>
-        <div class="campaigns-tabs">
-            <button class="campaigns-tab active">En vivo</button>
-            <button class="campaigns-tab">Siguiente</button>
-            <button class="campaigns-tab">Historia</button>
-        </div>
-        <div class="campaigns-list">
-            <!-- Campaign 1 -->
-            <div class="campaign-card" onclick="navigateTo('screen-campaign-detail','fade')">
-                <div class="campaign-card-bg" style="background-image:url('img/campaign1.png');"></div>
-                <div class="campaign-card-overlay"></div>
-                <div class="campaign-card-content">
-                    <div class="campaign-card-badges">
-                        <span class="status-badge badge-pending"><span class="badge-num">2</span><span class="badge-icon">⏳</span></span>
-                        <span class="status-badge badge-blocked"><span class="badge-num">11</span><span class="badge-icon">⊘</span></span>
-                        <span class="status-badge badge-done"><span class="badge-num">2</span><span class="badge-icon">✓</span></span>
-                    </div>
-                    <div class="campaign-card-title">Nueva Colección al Frente</div>
-                    <div class="campaign-card-date">1 DIC 2027 <span class="arrow">→</span> 24 DIC 2027</div>
-                </div>
-            </div>
-            <!-- Campaign 2 -->
-            <div class="campaign-card">
-                <div class="campaign-card-bg" style="background-image:url('img/campaign2.png');"></div>
-                <div class="campaign-card-overlay"></div>
-                <div class="campaign-card-content">
-                    <div class="campaign-card-badges">
-                        <span class="status-badge badge-pending"><span class="badge-num">2</span><span class="badge-icon">✕</span></span>
-                        <span class="status-badge badge-blocked"><span class="badge-num">1</span><span class="badge-icon">⊡</span></span>
-                        <span class="status-badge badge-review"><span class="badge-num">5</span><span class="badge-icon">◎</span></span>
-                    </div>
-                    <div class="campaign-card-title">Operación del Día de San Valentín</div>
-                    <div class="campaign-card-date">12 NOV 2025 <span class="arrow">→</span> 15 NOV 2025</div>
-                </div>
-            </div>
-            <!-- Campaign 3 -->
-            <div class="campaign-card">
-                <div class="campaign-card-bg" style="background-image:url('img/campaign3.png');"></div>
-                <div class="campaign-card-overlay"></div>
-                <div class="campaign-card-content">
-                    <div class="campaign-card-badges">
-                        <span class="status-badge badge-pending"><span class="badge-num">2</span><span class="badge-icon">⏳</span></span>
-                        <span class="status-badge badge-blocked"><span class="badge-num">5</span><span class="badge-icon">⊘</span></span>
-                        <span class="status-badge badge-done"><span class="badge-num">4</span><span class="badge-icon">🔗</span></span>
-                    </div>
-                    <div class="campaign-card-title">Black Friday Listo para Brillar</div>
-                    <div class="campaign-card-date">2 NOV 2025 <span class="arrow">→</span> 11 NOV 2025</div>
-                </div>
-            </div>
-            <!-- Campaign 4 -->
-            <div class="campaign-card">
-                <div class="campaign-card-bg" style="background-image:url('img/campaign4.png');"></div>
-                <div class="campaign-card-overlay"></div>
-                <div class="campaign-card-content">
-                    <div class="campaign-card-badges">
-                        <span class="status-badge badge-pending"><span class="badge-num">2</span><span class="badge-icon">⏳</span></span>
-                        <span class="status-badge badge-blocked"><span class="badge-num">1</span><span class="badge-icon">⊡</span></span>
-                        <span class="status-badge badge-done"><span class="badge-num">2</span><span class="badge-icon">⊘</span></span>
-                        <span class="status-badge badge-gray"><span class="badge-num">1</span><span class="badge-icon">✓</span></span>
-                    </div>
-                    <div class="campaign-card-title">Nueva Colección al Frente</div>
-                    <div class="campaign-card-date">25 OCT 2025 <span class="arrow">→</span> 31 OCT 2025</div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- ======== SCREEN 2: Campaign Detail ======== -->
-    <div class="screen hidden" id="screen-campaign-detail">
-        <div class="campaign-detail-hero">
-            <div class="campaign-detail-hero-bg" style="background-image:url('img/campaign1.png');"></div>
-            <div class="campaign-detail-hero-overlay"></div>
-            <button class="back-btn" onclick="navigateBack('screen-campaigns','fade')">
-                <svg viewBox="0 0 24 24" fill="#fff"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-            </button>
-            <div class="campaign-detail-hero-content">
-                <div class="campaign-detail-tags">
-                    <span class="status-badge badge-pending"><span class="badge-num">2</span><span class="badge-icon">⏳</span></span>
-                    <span class="status-badge badge-blocked"><span class="badge-num">11</span><span class="badge-icon">⊘</span></span>
-                    <span class="status-badge badge-done"><span class="badge-num">2</span><span class="badge-icon">✓</span></span>
-                </div>
-            </div>
-        </div>
-        <div class="campaign-detail-body">
-            <div class="campaign-detail-date">1 DIC 2027 <span class="arrow">→</span> 24 DIC 2027</div>
-            <div class="campaign-detail-title">Nueva Colección al Frente</div>
-            <div class="campaign-detail-desc">Arranca la nueva colección con una tienda impecable y un equipo coordinado.</div>
-            <div class="detail-tabs">
-                <button class="detail-tab active">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="#29B6F6" style="vertical-align:-2px; margin-right:4px;"><circle cx="12" cy="12" r="6"/></svg>
-                    En vivo <span class="tab-count">(2)</span>
-                </button>
-                <button class="detail-tab">Todas</button>
-            </div>
-            <!-- Task 1 - clickable -->
-            <div class="task-card" onclick="navigateTo('screen-task','slide-right')">
-                <div class="task-card-header">
-                    <span class="tag tag-yellow">EN PROGRESO</span>
-                    <span class="task-card-date-pill">21 DIC 2027 08:30</span>
-                </div>
-                <div class="task-card-title">Colocar la nueva decoración</div>
-                <div class="task-card-meta">
-                    <span class="task-card-meta-item">
-                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
-                        1
-                    </span>
-                    <span class="task-card-meta-item">
-                        <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                        2h
-                    </span>
-                </div>
-                <div class="task-card-badges">
-                    <span class="tag tag-orange">CAJERO</span>
-                    <span class="tag tag-pink">LOGÍSTICA</span>
-                </div>
-                <div class="task-card-steps">
-                    <div class="task-card-step"><span class="task-card-step-dot"></span> Revisar el acceso a la tienda</div>
-                    <div class="task-card-step"><span class="task-card-step-dot"></span> Comprobar la posición de la decoración</div>
-                </div>
-                <div class="task-card-cta">Adjunta evidencias para completar la tarea</div>
-                <div class="task-card-divider"></div>
-                <div class="task-card-footer">
-                    <div class="task-card-footer-icon">
-                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="16" cy="16" r="7" stroke="#1a1a1a" stroke-width="2.5" fill="none"/>
-                            <path d="M16 26c-7 0-13 3.5-13 8v2h26v-2c0-4.5-6-8-13-8z" stroke="#1a1a1a" stroke-width="2.5" fill="none"/>
-                            <circle cx="34" cy="20" r="5" stroke="#1a1a1a" stroke-width="2.5" fill="none"/>
-                            <path d="M34 28c-4 0-8 2-8 5" stroke="#1a1a1a" stroke-width="2.5" fill="none"/>
-                        </svg>
-                    </div>
-                    <div class="task-card-footer-text">
-                        <strong>Revisable</strong><br>
-                        <span>4 revisores asignados</span>
-                    </div>
-                </div>
-            </div>
-            <!-- Task 2 - disabled -->
-            <div class="task-card disabled">
-                <div class="task-card-header">
-                    <span class="tag tag-gray">PENDIENTE</span>
-                    <span class="task-card-date-pill">22 DIC 2027 10:00</span>
-                </div>
-                <div class="task-card-title">Reponer artículos de mayor rotación</div>
-                <div class="task-card-meta">
-                    <span class="task-card-meta-item">
-                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
-                        2
-                    </span>
-                    <span class="task-card-meta-item">
-                        <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-                        1h
-                    </span>
-                </div>
-                <div class="task-card-badges">
-                    <span class="tag tag-orange">CAJERO</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ======== SCREEN 3: Task Page ======== -->
-    <div class="screen hidden" id="screen-task">
-        <div class="task-page-header">
-            <button class="close-btn" onclick="navigateBack('screen-campaign-detail','slide-right')">
-                <svg viewBox="0 0 24 24" fill="#1a1a1a"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-            </button>
-            <span class="tag tag-yellow">EN PROGRESO</span>
-            <div class="task-page-timer">
-                <span class="task-page-timer-val">15:00</span>
-                <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
-            </div>
-        </div>
-        <div class="task-page-body">
-            <div class="task-page-estimate">20 min estimado</div>
-            <div class="task-page-title">Colocar la nueva decoración</div>
-            <div class="task-page-desc">Tendrás que organizar todo el escaparate con la nueva colección, iluminación y elementos de temporada</div>
-            <div class="task-page-campaign-ref">
-                <div class="task-page-campaign-thumb" style="background-image:url('img/campaign1.png');"></div>
+    <!-- ========================= SCREEN: CAMPAIGNS ========================= -->
+    <div class="screen" id="screen-campaigns">
+        <!-- Module Page Header -->
+        <div style="background:white; padding: 16px 32px 32px; text-align:center; overflow:hidden;">
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:center;">
+                <i class="ti ti-clipboard-list icon-64" style="font-size:64px;color:#fe5d26"></i>
                 <div>
-                    <div class="task-page-campaign-ref-title">Nueva Colección al Frente</div>
-                    <div class="task-page-campaign-ref-date">1 DIC 2027 → 24 DIC 2027</div>
-                </div>
-            </div>
-            <div class="task-page-schedule">
-                <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/></svg>
-                01 JUL 26 14:00 → 02 JUL 26 15:00
-            </div>
-            <div class="task-page-review" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                <span class="tag tag-blue">Revisable</span>
-                <span class="tag tag-yellow">PENDING</span>
-            </div>
-            <div class="task-page-badges mb-16">
-                <span class="tag tag-orange">CAJERO</span>
-                <span class="tag tag-pink">LOGÍSTICA</span>
-            </div>
-            <div class="task-page-avatars mb-24">
-                <div class="avatar-circle" style="background:#E91E63;">RL</div>
-                <div class="avatar-circle" style="background:#29B6F6;">MG</div>
-                <div class="avatar-circle" style="background:#4CAF50;">JP</div>
-                <div class="avatar-circle" style="background:#FF9800;">AS</div>
-                <div class="avatar-circle" style="background:#AB47BC;">LM</div>
-                <span class="avatar-count">23</span>
-            </div>
-
-            <div class="section-title">Pasos</div>
-            <div class="mb-24">
-                <div class="step-item">
-                    <div class="step-checkbox" onclick="this.classList.toggle('checked')"></div>
-                    <span>Verifica el estado de los productos en exhibición</span>
-                </div>
-                <div class="step-item">
-                    <div class="step-checkbox" onclick="this.classList.toggle('checked')"></div>
-                    <span>Organiza los productos y reetiqueta precios si es necesario</span>
-                </div>
-            </div>
-
-            <div class="section-title">Entregables</div>
-            <div id="deliverables-list">
-                <div class="deliverable-item" onclick="openDeliverable(0)">
-                    <div class="deliverable-icon" id="deliv-icon-0">📷</div>
-                    <div class="deliverable-info">
-                        <div class="deliverable-title">Foto del escaparate</div>
-                        <div class="deliverable-subtitle" id="deliv-sub-0"></div>
-                    </div>
-                    <img class="deliverable-thumb" id="deliv-thumb-0" style="display:none;" />
-                    <span class="deliverable-arrow">›</span>
-                </div>
-                <div class="deliverable-item" onclick="openDeliverable(1)">
-                    <div class="deliverable-icon">📷</div>
-                    <div class="deliverable-info">
-                        <div class="deliverable-title">Foto del escaparate</div>
-                        <div class="deliverable-subtitle"></div>
-                    </div>
-                    <span class="deliverable-arrow">›</span>
-                </div>
-                <div class="deliverable-item" onclick="openDeliverable(2)">
-                    <div class="deliverable-icon">📷</div>
-                    <div class="deliverable-info">
-                        <div class="deliverable-title">Foto de punto de venta</div>
-                        <div class="deliverable-subtitle"></div>
-                    </div>
-                    <span class="deliverable-arrow">›</span>
+                    <p class="h1" style="color:var(--color-text-primary);">Campañas</p>
+                    <p class="p1 text-secondary" style="margin-top:4px;">Participa y completa tareas para eventos especiales</p>
                 </div>
             </div>
         </div>
-        <div class="task-page-bottom" id="task-bottom-bar">
-            <div class="slider-btn" id="complete-slider">COMPLETA LA TAREA</div>
+
+        <!-- Filters -->
+        <div style="padding: 0 24px 12px;">
+            <div class="tab-system">
+                <button class="tab-item active" data-filter="live">
+                    <i class="ti ti-broadcast" style="font-size:20px"></i>
+                    En vivo
+                </button>
+                <button class="tab-item" data-filter="next">Siguiente</button>
+                <button class="tab-item" data-filter="history">Historia</button>
+            </div>
+        </div>
+
+        <!-- Campaign Cards -->
+        <div style="display:flex; flex-wrap:wrap; gap:24px; padding:12px 24px 24px;" id="campaign-list">
         </div>
     </div>
 
-    <!-- ======== SCREEN 4: Deliverable Detail ======== -->
-    <div class="screen hidden" id="screen-deliverable">
-        <div class="screen-header">
-            <button class="back-btn" onclick="navigateBack('screen-task','slide-right')">
-                <svg viewBox="0 0 24 24" fill="#1a1a1a"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-            </button>
-        </div>
-        <div class="deliv-detail-body" id="deliv-detail-body">
-            <div class="deliv-detail-title" id="deliv-detail-title">Foto del escaparate</div>
-            <div class="deliv-detail-subtitle">Toma una foto frontal del escaparate para asegurarte de que cumple con los estándares</div>
-            <div class="deliv-ref-placeholder" id="deliv-ref-image">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 160'%3E%3Crect fill='%2380DEEA' width='200' height='160' rx='8'/%3E%3Ctext x='100' y='88' text-anchor='middle' fill='%23fff' font-size='40'%3E🏪%3C/text%3E%3C/svg%3E" alt="" />
-            </div>
-            <div class="info-card">
-                <div class="info-card-title">
-                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                    Puntos clave
-                </div>
-                <div class="info-card-item"><span class="info-card-bullet">•</span> El producto debe estar centrado</div>
-                <div class="info-card-item"><span class="info-card-bullet">•</span> Asegúrate de que el fondo sea del color correcto</div>
-                <div class="info-card-item"><span class="info-card-bullet">•</span> La decoración no debe cubrir el producto</div>
-                <div class="info-card-item"><span class="info-card-bullet">•</span> Toda la luz debe estar enfocada en el producto</div>
-            </div>
-            <!-- Delivery section (shown after confirm) -->
-            <div id="delivery-section" style="display:none;">
-                <div class="delivery-section">
-                    <div class="delivery-section-title">Entrega</div>
-                    <div class="delivery-photo-row">
-                        <img id="delivery-thumb" class="delivery-photo-thumb" />
-                        <div class="delivery-photo-info">
-                            <div class="delivery-photo-name">Roberto López</div>
-                            <div>16 FEB 26</div>
+    <!-- ========================= SCREEN: CAMPAIGN DETAIL ========================= -->
+    <div class="screen hidden" id="screen-campaign-detail">
+        <!-- Campaign Header with image -->
+        <div style="padding:24px; display:flex;flex-direction:column;gap:24px;">
+            <!-- Hero Image -->
+            <div id="cd-hero" style="position:relative; border-radius:var(--radius-16); height:224px; overflow:hidden; box-shadow:var(--shadow-md);">
+                <img id="cd-hero-img" src="" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+                <div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:space-between;height:100%;padding:16px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                        <button class="btn-icon-lg" style="background:rgba(0,0,0,0.32);border-radius:var(--radius-8);" onclick="navigateBack()">
+                            <i class="ti ti-chevron-left" style="font-size:24px;color:white"></i>
+                        </button>
+                        <div class="progress-ring" style="width:24px;height:24px;">
+                            <svg viewBox="0 0 24 24"><circle class="bg" cx="12" cy="12" r="10" stroke-width="3" fill="none" stroke="rgba(255,255,255,0.3)"/><circle id="cd-progress" class="fg" cx="12" cy="12" r="10" stroke-width="3" fill="none" stroke="var(--color-accent)" stroke-dasharray="62.83" stroke-dashoffset="20" stroke-linecap="round" transform="rotate(-90 12 12)"/></svg>
                         </div>
                     </div>
+                    <div id="cd-tags" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
                 </div>
             </div>
-            <div style="height:16px;"></div>
-            <div id="deliv-action-area">
-                <button class="btn-primary" id="btn-realizar-entrega" onclick="openUploadModal()">REALIZAR ENTREGA</button>
+
+            <!-- Campaign Info -->
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                <div id="cd-dates" class="caption text-secondary" style="display:flex;gap:8px;align-items:center;"></div>
+                <p id="cd-title" class="h1-detail"></p>
+                <p id="cd-desc" class="p1"></p>
             </div>
-            <div id="deliv-undo-area" style="display:none; padding-bottom: 20px;">
-                <button class="btn-danger" onclick="undoDelivery()">DESHACER ENTREGA</button>
+
+            <!-- Filter tabs -->
+            <div>
+                <div class="tab-system">
+                    <button class="tab-item active">
+                        <i class="ti ti-broadcast" style="font-size:20px"></i>
+                        <span id="cd-tab-label">En vivo (2)</span>
+                    </button>
+                    <button class="tab-item">Todas</button>
+                </div>
             </div>
-            <div style="height:32px;"></div>
+        </div>
+
+        <!-- Task Cards -->
+        <div id="cd-tasks" style="padding:0 24px 24px; display:flex;flex-direction:column;gap:24px;"></div>
+    </div>
+
+    <!-- ========================= SCREEN: TASK DETAIL ========================= -->
+    <div class="screen screen-flex hidden" id="screen-task-detail">
+        <!-- Task Header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 24px 0 16px;height:56px;border-bottom:2px solid var(--color-border);flex-shrink:0;">
+            <button class="btn-icon" onclick="navigateBack()">
+                <i class="ti ti-x" style="font-size:24px;color:var(--color-text-primary)"></i>
+            </button>
+            <div id="td-header-tags" style="display:flex;gap:8px;align-items:center;"></div>
+        </div>
+
+        <!-- Scrollable body -->
+        <div style="flex:1;overflow-y:auto;overflow-x:hidden;">
+            <!-- Title section -->
+            <div style="padding:24px;display:flex;flex-direction:column;gap:8px;">
+                <p id="td-estimate" class="p2 text-secondary"></p>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    <p id="td-title" class="h1-detail"></p>
+                    <p id="td-desc" class="p1"></p>
+                </div>
+            </div>
+
+            <!-- Info rows -->
+            <div id="td-info-rows"></div>
+
+            <!-- Steps section -->
+            <div class="collapsible-section" id="td-steps-section">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span class="title">Pasos</span>
+                    <i class="ti ti-chevron-up chevron"></i>
+                </div>
+                <div class="collapsible-body" id="td-steps-list"></div>
+            </div>
+
+            <!-- Deliverables section -->
+            <div class="collapsible-section" id="td-deliverables-section">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span class="title">Entregables</span>
+                    <i class="ti ti-chevron-up chevron"></i>
+                </div>
+                <div class="collapsible-body" id="td-deliverables-list" style="padding-bottom:12px;"></div>
+            </div>
+
+            <!-- Footer (inside scroll) -->
+            <div class="task-footer">
+                <div class="slider-btn" id="td-slider">
+                    <span class="slider-label">COMPLETA LA TAREA</span>
+                    <div class="slider-thumb" id="td-slider-thumb">
+                        <i class="ti ti-lock" style="font-size:32px"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- ======== Upload Modal ======== -->
-    <div class="modal-overlay" id="modal-overlay" onclick="closeUploadModal()"></div>
-    <div class="modal-drawer" id="modal-drawer">
-        <div class="modal-handle"></div>
-        <div class="modal-body">
-            <div class="modal-title">Foto del escaparate</div>
-            <div class="modal-subtitle">Sube una imagen para continuar</div>
-            <div class="ai-bubble">
-                <div class="ai-icon">AI</div>
-                <div class="ai-bubble-box">Sube la foto y te ayudo a revisarlo antes de confirmarlo!</div>
+    <!-- ========================= SCREEN: DELIVERABLE DETAIL ========================= -->
+    <div class="screen screen-flex hidden" id="screen-deliverable">
+        <!-- Body -->
+        <div style="flex:1;overflow-y:auto;padding:24px 0;">
+            <!-- Title with back button -->
+            <div style="padding:0 24px;display:flex;flex-direction:column;gap:16px;">
+                <div style="display:flex;align-items:flex-start;gap:12px;">
+                    <div style="flex:1;">
+                        <p id="del-title" class="h1-detail"></p>
+                        <p id="del-desc" class="p1 text-secondary" style="margin-top:8px;"></p>
+                    </div>
+                    <button class="btn-icon" onclick="navigateBack()" style="margin-top:4px;flex-shrink:0;">
+                        <i class="ti ti-chevron-left" style="font-size:24px;color:var(--color-text-primary)"></i>
+                    </button>
+                </div>
             </div>
 
-            <!-- Upload zone -->
-            <div id="upload-zone-container">
-                <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
-                    <div class="upload-zone-icon">
-                        <svg viewBox="0 0 24 24"><path d="M12 12m-3.2 0a3.2 3.2 0 1 0 6.4 0a3.2 3.2 0 1 0-6.4 0M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="#29B6F6"/></svg>
-                        <div class="upload-zone-icon-badge">+</div>
+            <!-- Image + Banner -->
+            <div style="padding:32px 24px;display:flex;flex-direction:column;gap:16px;">
+                <div id="del-image-container" style="border-radius:var(--radius-8);overflow:hidden;height:240px;background:var(--color-bg-filled);">
+                    <img id="del-image" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;">
+                    <div id="del-no-image" class="flex-center" style="height:100%;flex-direction:column;gap:8px;color:var(--color-text-secondary);">
+                        <i class="ti ti-photo" style="font-size:48px"></i>
+                        <span class="p2">Sin imagen aún</span>
                     </div>
-                    <div class="upload-zone-title">Subir imagen</div>
-                    <div class="upload-zone-sub">o busca en tu dispositivo</div>
                 </div>
-                <input type="file" id="file-input" accept="image/*" capture="environment" style="display:none;" onchange="handleFileSelect(event)" />
-                <button class="btn-cancel" onclick="closeUploadModal()">CANCELAR</button>
+                <div id="del-banner" class="info-banner">
+                    <i class="ti ti-info-square-rounded banner-icon" style="font-size:20px"></i>
+                    <div class="banner-content">
+                        <p class="banner-title">Puntos clave</p>
+                        <ul id="del-guidelines"></ul>
+                    </div>
+                </div>
             </div>
 
-            <!-- Analysis container -->
-            <div class="analysis-container" id="analysis-container">
-                <div class="analysis-image-wrap">
-                    <img class="analysis-image" id="analysis-image" />
-                    <div class="analysis-image-overlay" id="analysis-overlay">
-                        <div class="analysis-glow" id="analysis-glow">AI</div>
-                        <div class="analysis-text" id="analysis-text">Analizando tu foto ...</div>
+            <!-- Actions for delivered -->
+            <div id="del-delivered-actions" style="display:none;padding:0 24px;flex-direction:column;gap:16px;">
+                <div class="dropdown-option">
+                    <img id="del-entrega-thumb" src="" alt="" style="width:86px;height:48px;border-radius:var(--radius-4);object-fit:cover;flex-shrink:0;">
+                    <div class="opt-body">
+                        <div class="opt-label">Entrega</div>
+                        <div class="opt-sub" id="del-entrega-meta"></div>
                     </div>
-                    <div class="analysis-badge" id="analysis-badge"></div>
                 </div>
+                <button class="btn-delete" onclick="openRedoModal()">
+                    <i class="ti ti-trash" style="font-size:20px"></i>
+                    DESHACER ENTREGA
+                </button>
+            </div>
 
-                <!-- AI verdict -->
-                <div class="ai-verdict" id="ai-verdict">
-                    <div class="ai-icon">AI</div>
-                    <div class="ai-verdict-bubble" id="ai-verdict-text"></div>
-                </div>
-
-                <!-- Feedback cards -->
-                <div class="feedback-section" id="feedback-section"></div>
-
-                <!-- Action buttons -->
-                <div id="post-analysis-actions" style="display:none; width:100%;">
-                    <button class="btn-confirm" onclick="confirmImage()" style="margin-bottom:8px;">CONFIRMAR IMAGEN</button>
-                    <button class="btn-cancel" onclick="cancelAnalysis()">CANCELAR</button>
-                </div>
-                <div style="height:16px;"></div>
+            <!-- Footer button (inside scroll) -->
+            <div id="del-footer" style="padding:24px;">
+                <button class="btn-primary" onclick="openAIAnalysisModal()" style="background:#fe5d26;">REALIZAR ENTREGA</button>
             </div>
         </div>
     </div>
+
+    <!-- ========================= MODAL: AI ANALYSIS ========================= -->
+    <div class="modal-overlay" id="modal-ai-analysis">
+        <div class="modal-sheet" id="ai-sheet">
+
+            <!-- State: Upload (initial) -->
+            <div id="ai-state-upload">
+                <div class="ai-modal-body">
+                    <div class="ai-welcome-wrapper" id="ai-welcome-wrapper">
+                        <div class="ai-welcome" id="ai-welcome-bubble">
+                            <div class="tag-ai xl" id="ai-welcome-icon">AI</div>
+                            <div id="ai-welcome-content">
+                                <div class="ai-typing" id="ai-welcome-typing">
+                                    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                                </div>
+                                <div class="ai-bubble-welcome" id="ai-welcome-text">Sube la foto y te ayudo a revisarlo antes de confirmarlo!</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Unified image stage: dropper → preview → analyzing in one container -->
+                    <div class="ai-image-stage" id="ai-image-stage" onclick="document.getElementById('ai-file-input').click()">
+                        <div class="dropper-placeholder" id="ai-dropper-placeholder">
+                            <div class="ai-camera-icon"><i class="ti ti-camera-plus"></i></div>
+                            <span class="dropper-title">Subir imagen</span>
+                            <span class="dropper-sub">o busca en tu dispositivo</span>
+                        </div>
+                        <img id="ai-stage-img" src="" alt="">
+                        <div class="ai-analyzing-overlay" id="ai-glow-overlay">
+                            <div class="glow"></div>
+                            <div class="glow-orbit"></div>
+                            <div class="ai-orb-wrapper">
+                                <div class="ai-particle"></div>
+                                <div class="ai-particle"></div>
+                                <div class="tag-ai xl">AI</div>
+                            </div>
+                            <span class="ai-label" id="ai-kpi-label">Analizando tu foto ...</span>
+                        </div>
+                        <div class="verdict-overlay" id="ai-verdict-overlay">
+                            <span id="ai-verdict-tag" class="status-tag xl warning">MEJORABLE</span>
+                        </div>
+                    </div>
+                    <!-- Results content (revealed below the stage) -->
+                    <div id="ai-results-content" style="display:none;flex-direction:column;gap:32px;margin-top:32px;">
+                        <div class="ai-message ai-reveal" id="ai-reveal-tag">
+                            <div class="tag-ai xl">AI</div>
+                            <div class="ai-typing" id="ai-typing-dots">
+                                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                            </div>
+                            <div class="ai-bubble" id="ai-message-text" style="display:none;"></div>
+                        </div>
+                        <div id="ai-feedback-cards" class="ai-reveal" style="display:flex;flex-direction:column;gap:16px;"></div>
+                    </div>
+                    <div class="ai-actions-inline" id="ai-upload-actions">
+                        <button class="btn-secondary" onclick="closeAIModal()">CANCELAR</button>
+                    </div>
+                    <input type="file" accept="image/*" capture="environment" id="ai-file-input" class="hidden-input" onchange="handleAIFileSelect(event)">
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <!-- ========================= MODAL: REDO DELIVERABLE ========================= -->
+    <div class="modal-overlay center-modal" id="modal-redo">
+        <div class="modal-center">
+            <i class="ti ti-trash" style="font-size:64px;color:var(--color-error)"></i>
+            <p class="h1-detail" style="margin-top:16px;">Deshacer entrega</p>
+            <p class="p1 text-secondary" style="margin-top:8px;">La imagen que se subió se perderá. ¿Estás seguro?</p>
+            <div style="display:flex;flex-direction:column;gap:16px;margin-top:32px;">
+                <button class="btn-error-hold" id="redo-hold-btn">
+                    <div class="hold-bar" id="redo-hold-bar"></div>
+                    <span style="position:relative;z-index:1;">MANTEN PARA DESHACER</span>
+                </button>
+                <button class="btn-secondary" onclick="closeRedoModal()">CERRAR</button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
-(function() {
-    // State
-    var currentScreen = 'screen-campaigns';
-    var screenHistory = [];
-    var clientId = '';
-    var selectedFile = null;
-    var deliveredImages = {};
-    var analysisResult = null;
-    var currentDeliverableIndex = 0;
+// ========================================================================
+// DATA
+// ========================================================================
+const DEMO_CAMPAIGNS = [
+    {
+        id: 'c1',
+        title: 'Nueva Colección al Frente',
+        image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80',
+        dateStart: '1 DIC 2027', dateEnd: '24 DIC 2027',
+        progress: 0.87,
+        tags: [
+            { count: 2, type: 'silver', icon: 'circle' },
+            { count: 11, type: 'success', icon: 'check-circle' },
+            { count: 2, type: 'success-check', icon: 'check' }
+        ],
+        description: 'Arranca la nueva colección con una tienda impecable y un equipo coordinado.',
+        tasks: [
+            {
+                id: 't1', title: 'Colocar la nueva decoración',
+                description: 'Tendrás que organizar todo el escaparate con la nueva colección, iluminación y elementos de temporada',
+                status: 'warning', statusLabel: 'EN PROGRESO',
+                schedule: '21 DIC 2027 08:30', estimate: '20 min estimado',
+                priority: 'medium',
+                deliverables: 1, time: '2h',
+                roles: ['CAJERO', 'LOGÍSTICA'], roleColors: ['warning', 'error'],
+                steps: [
+                    'Verifica el estado de los productos en exhibición',
+                    'Organiza los productos y reetiqueta precios si es necesario'
+                ],
+                deliverablesData: [{
+                    id: 'd1', title: 'Foto del escaparate',
+                    description: 'Toma una foto frontal del escaparate para asegurarte de que cumple con los estándares',
+                    guidelines: [
+                        'Todas las camisas tienen que estar ordenadas',
+                        'Los carteles tienen especial relevancia, tened cuidado de colocarlos bien',
+                        'No debe haber objetos extraños (vasos, papeles, basura) en el expositor',
+                        'Los cables deben estar ocultos o recogidos, no visibles en la zona frontal',
+                        'El producto de promoción, la camisa azul es súper importante'
+                    ],
+                    thumbnail: '/app/img/escaparate_cliente_c.png',
+                    delivered: false, deliveredImage: null
+                }],
+                reviewable: true, reviewers: 4,
+                campaignTitle: 'Nueva Colección al Frente',
+                campaignDates: '25 Oct 2025 → 7 JUL 26',
+                campaignThumb: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=200&q=80',
+                taskDates: { startDate: '01 JUL 26', startTime: '14:00', endDate: '02 JUL 26', endTime: '15:00' },
+                assignees: 23
+            },
+            {
+                id: 't2', title: 'Reponer artículos de mayor rotación.',
+                description: 'Comprueba que los sistemas de caja y TPV funcionen correctamente para grandes volúmenes de ventas.',
+                status: 'silver', statusLabel: 'PENDIENTE',
+                schedule: '28 OCT 2026 11:30', estimate: '30 min estimado',
+                priority: null,
+                deliverables: 1, time: '2h',
+                roles: ['CAJERO'], roleColors: ['warning'],
+                steps: [
+                    'Revisar el inventario actual',
+                    'Solicitar reposición de artículos faltantes'
+                ],
+                deliverablesData: [{
+                    id: 'd2', title: 'Foto del lineal repuesto',
+                    description: 'Fotografía el lineal una vez repuesto para verificar que todo está en orden',
+                    guidelines: [
+                        'Todos los huecos deben estar cubiertos',
+                        'Las etiquetas de precio deben ser visibles',
+                        'Los productos deben estar alineados'
+                    ],
+                    thumbnail: null,
+                    delivered: false, deliveredImage: null
+                }],
+                reviewable: false, reviewers: 0,
+                campaignTitle: 'Nueva Colección al Frente',
+                campaignDates: '1 DIC 2027 → 24 DIC 2027',
+                campaignThumb: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=200&q=80',
+                taskDates: { startDate: '15 DIC 27', startTime: '09:00', endDate: '20 DIC 27', endTime: '18:00' },
+                assignees: 5
+            }
+        ]
+    },
+    {
+        id: 'c2',
+        title: 'Operación del Día de San Valentín',
+        image: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800&q=80',
+        dateStart: '12 NOV 2025', dateEnd: '15 NOV 2025',
+        progress: 0.62,
+        tags: [
+            { count: 2, type: 'error', icon: 'x' },
+            { count: 1, type: 'error-solid', icon: 'calendar-x' },
+            { count: 5, type: 'success', icon: 'check-circle' }
+        ],
+        description: 'Prepara la tienda con decoración temática y promociones especiales.',
+        tasks: []
+    },
+    {
+        id: 'c3',
+        title: 'Black Friday Listo para Brillar',
+        image: 'https://images.unsplash.com/photo-1607082349566-187342175e2f?w=800&q=80',
+        dateStart: '2 NOV 2025', dateEnd: '11 NOV 2025',
+        progress: 0.38,
+        tags: [
+            { count: 2, type: 'outline', icon: 'hand' },
+            { count: 5, type: 'silver', icon: 'circle' },
+            { count: 2, type: 'warning', icon: 'half-circle' },
+            { count: 4, type: 'course', icon: 'user-search' }
+        ],
+        description: 'Asegura que todo esté listo para el evento más grande del año.',
+        tasks: []
+    },
+    {
+        id: 'c4',
+        title: 'Nueva Colección al Frente',
+        image: 'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=800&q=80',
+        dateStart: '25 OCT 2025', dateEnd: '31 OCT 2025',
+        progress: 0.5,
+        tags: [
+            { count: 2, type: 'outline', icon: 'hand' },
+            { count: 1, type: 'course', icon: 'user-search' },
+            { count: 1, type: 'error-solid', icon: 'calendar-x' },
+            { count: 2, type: 'success', icon: 'check-circle' },
+            { count: 1, type: 'success-check', icon: 'check' }
+        ],
+        description: 'Renueva el escaparate con la colección de temporada.',
+        tasks: []
+    }
+];
 
-    // Load clients
-    async function loadClients() {
-        try {
-            var resp = await fetch(window.location.origin + '/clients');
-            var clients = await resp.json();
-            if (clients && clients.length > 0) clientId = clients[0].client_id;
-        } catch(e) {
-            console.warn('Could not load clients:', e);
-            clientId = 'default';
+// State
+let screenStack = ['screen-campaigns'];
+let currentCampaign = null;
+let currentTask = null;
+let currentDeliverable = null;
+let selectedFile = null;
+
+// ========================================================================
+// NAVIGATION
+// ========================================================================
+function navigateTo(screenId) {
+    const currentId = screenStack[screenStack.length - 1];
+    const current = document.getElementById(currentId);
+    const next = document.getElementById(screenId);
+
+    // Position next screen off-screen to the right, no transition
+    next.classList.remove('hidden', 'animating');
+    next.style.transform = 'translateX(100%)';
+    next.scrollTop = 0;
+
+    // Force layout so the position is applied before animating
+    next.offsetWidth;
+
+    // Now enable transitions and animate both screens
+    next.classList.add('animating');
+    current.classList.add('animating');
+    next.style.transform = '';
+    current.style.transform = 'translateX(-30%)';
+    current.style.opacity = '0.5';
+
+    setTimeout(() => {
+        current.classList.add('hidden');
+        current.classList.remove('animating');
+        current.style.transform = '';
+        current.style.opacity = '';
+    }, 350);
+
+    screenStack.push(screenId);
+}
+
+function navigateBack() {
+    if (screenStack.length <= 1) return;
+    const currentId = screenStack.pop();
+    const prevId = screenStack[screenStack.length - 1];
+    const current = document.getElementById(currentId);
+    const prev = document.getElementById(prevId);
+
+    // Position prev screen where it was pushed to (left), no transition
+    prev.classList.remove('hidden', 'animating');
+    prev.style.transform = 'translateX(-30%)';
+    prev.style.opacity = '0.5';
+
+    // Force layout
+    prev.offsetWidth;
+
+    // Now enable transitions and animate both
+    prev.classList.add('animating');
+    current.classList.add('animating');
+    prev.style.transform = '';
+    prev.style.opacity = '';
+    current.style.transform = 'translateX(100%)';
+
+    setTimeout(() => {
+        current.classList.add('hidden');
+        current.classList.remove('animating');
+        current.style.transform = '';
+    }, 350);
+}
+
+// ========================================================================
+// RENDER: CAMPAIGNS
+// ========================================================================
+function renderCampaigns() {
+    const list = document.getElementById('campaign-list');
+    list.innerHTML = DEMO_CAMPAIGNS.map(c => {
+        const circumference = 2 * Math.PI * 10;
+        const offset = circumference * (1 - c.progress);
+        return `
+        <div class="campaign-card" onclick="openCampaign('${c.id}')">
+            <img class="cover" src="${c.image}" alt="${c.title}">
+            <div class="card-body">
+                <div class="card-top">
+                    <div class="card-tags">
+                        ${c.tags.map(t => `<span class="status-tag ${t.type}">${t.count} ${getTagIcon(t.icon)}</span>`).join('')}
+                    </div>
+                    <svg class="progress-ring" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke-width="3" fill="none" stroke="rgba(255,255,255,0.3)"/>
+                        <circle cx="12" cy="12" r="10" stroke-width="3" fill="none" stroke="var(--color-accent)" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round" transform="rotate(-90 12 12)"/>
+                    </svg>
+                </div>
+                <div class="card-bottom">
+                    <div class="card-title">${c.title}</div>
+                    <div class="card-dates">
+                        <span>${c.dateStart}</span>
+                        <i class="ti ti-arrow-right" style="font-size:16px"></i>
+                        <span>${c.dateEnd}</span>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function getTagIcon(type) {
+    const icons = {
+        'circle': '<i class="ti ti-circle" style="font-size:16px"></i>',
+        'check-circle': '<i class="ti ti-circle-check" style="font-size:16px"></i>',
+        'check': '<i class="ti ti-check" style="font-size:16px"></i>',
+        'x': '<i class="ti ti-x" style="font-size:16px"></i>',
+        'calendar-x': '<i class="ti ti-calendar-x" style="font-size:16px"></i>',
+        'hand': '<i class="ti ti-hand-stop" style="font-size:16px"></i>',
+        'half-circle': '<i class="ti ti-circle-half-2" style="font-size:16px"></i>',
+        'user-search': '<i class="ti ti-user-search" style="font-size:16px"></i>'
+    };
+    return icons[type] || '';
+}
+
+// ========================================================================
+// RENDER: CAMPAIGN DETAIL
+// ========================================================================
+function openCampaign(id) {
+    currentCampaign = DEMO_CAMPAIGNS.find(c => c.id === id);
+    if (!currentCampaign) return;
+    const c = currentCampaign;
+
+    document.getElementById('cd-hero-img').src = c.image;
+    document.getElementById('cd-title').textContent = c.title;
+    document.getElementById('cd-desc').textContent = c.description;
+    document.getElementById('cd-dates').innerHTML = `
+        <span>${c.dateStart}</span>
+        <i class="ti ti-arrow-right arrow-right-sm" style="font-size:16px"></i>
+        <span>${c.dateEnd}</span>`;
+    document.getElementById('cd-tags').innerHTML = c.tags.map(t =>
+        `<span class="status-tag ${t.type}">${t.count} ${getTagIcon(t.icon)}</span>`
+    ).join('');
+    document.getElementById('cd-tab-label').textContent = `En vivo (${c.tasks.length})`;
+
+    const circumference = 2 * Math.PI * 10;
+    const offset = circumference * (1 - c.progress);
+    document.getElementById('cd-progress').setAttribute('stroke-dashoffset', offset);
+
+    // Tasks
+    const tasksEl = document.getElementById('cd-tasks');
+    tasksEl.innerHTML = c.tasks.map(t => renderTaskCard(t)).join('');
+
+    navigateTo('screen-campaign-detail');
+}
+
+function renderTaskCard(t) {
+    const stepsHtml = t.steps.map(s => `
+        <div class="step-item">
+            <i class="ti ti-point-filled" style="font-size:24px;color:var(--color-silver)"></i>
+            <span class="step-text">${s}</span>
+        </div>`).join('');
+
+    const badgesHtml = t.roles.map((r, i) =>
+        `<span class="badge ${t.roleColors[i]}">${r}</span>`).join('');
+
+    const reviewerHtml = t.reviewable ? `
+        <div class="reviewer-row">
+            <i class="ti ti-user-search" style="font-size:32px"></i>
+            <div class="info">
+                <div class="label">Revisable</div>
+                <div class="sub">${t.reviewers} revisores asignados</div>
+            </div>
+        </div>` : '';
+
+    const superbHtml = t.status === 'warning' ? `<div class="superb-banner">Adjunta evidencias para completar la tarea</div>` : '';
+
+    return `
+    <div class="task-card" onclick="openTask('${t.id}')">
+        <div class="tag-row">
+            <span class="status-tag ${t.status}">${t.statusLabel}</span>
+            <span class="status-tag silver">${t.schedule}</span>
+        </div>
+        <div>
+            <div class="task-title">${t.title}</div>
+            ${t.description ? `<div class="task-desc" style="margin-top:8px;">${t.description}</div>` : ''}
+        </div>
+        <div class="icon-row">
+            <div class="item">
+                <i class="ti ti-file-text" style="font-size:20px"></i>
+                ${t.deliverables}
+            </div>
+            <div class="item">
+                <i class="ti ti-clock" style="font-size:20px"></i>
+                ${t.time}
+            </div>
+        </div>
+        <div class="badge-row">${badgesHtml}</div>
+        <div class="steps-list">${stepsHtml}</div>
+        ${superbHtml}
+        ${reviewerHtml}
+    </div>`;
+}
+
+// ========================================================================
+// RENDER: TASK DETAIL
+// ========================================================================
+function openTask(id) {
+    currentTask = currentCampaign.tasks.find(t => t.id === id);
+    if (!currentTask) return;
+    const t = currentTask;
+
+    // Header tags
+    const headerTags = document.getElementById('td-header-tags');
+    let priorityHtml = '';
+    if (t.priority === 'medium') {
+        priorityHtml = `<span class="status-tag warning" style="width:24px;height:24px;padding:4px;display:flex;align-items:center;justify-content:center;">
+            <i class="ti ti-chevron-up" style="font-size:16px"></i>
+        </span>`;
+    }
+    headerTags.innerHTML = `
+        <span class="status-tag ${t.status}">${t.statusLabel}</span>
+        <span class="status-tag outline">${t.taskDates.endTime}</span>
+        ${priorityHtml}`;
+
+    document.getElementById('td-estimate').textContent = t.estimate;
+    document.getElementById('td-title').textContent = t.title;
+    document.getElementById('td-desc').textContent = t.description;
+
+    // Info rows
+    const rowsEl = document.getElementById('td-info-rows');
+    rowsEl.innerHTML = `
+        <!-- Campaign row -->
+        <div class="info-row">
+            <i class="ti ti-stack-2 row-icon" style="font-size:32px"></i>
+            <div class="row-body">
+                <div class="row-label">${t.campaignTitle}</div>
+                <div class="row-sub">
+                    <span>${t.campaignDates.split('→')[0].trim()}</span>
+                    <i class="ti ti-arrow-right" style="font-size:16px"></i>
+                    <span>${t.campaignDates.split('→')[1].trim()}</span>
+                </div>
+            </div>
+            <img class="campaign-thumb" src="${t.campaignThumb}" alt="">
+        </div>
+        <!-- Dates row -->
+        <div class="info-row">
+            <i class="ti ti-calendar row-icon" style="font-size:32px"></i>
+            <div class="date-range">
+                <div class="date-col"><span class="date-val">${t.taskDates.startDate}</span><span class="date-time">${t.taskDates.startTime}</span></div>
+                <i class="ti ti-arrow-right arrow-right-sm" style="font-size:16px;color:var(--color-text-secondary)"></i>
+                <div class="date-col"><span class="date-val">${t.taskDates.endDate}</span><span class="date-time">${t.taskDates.endTime}</span></div>
+            </div>
+        </div>
+        <!-- Reviewer row -->
+        ${t.reviewable ? `
+        <div class="info-row" style="justify-content:space-between;">
+            <div style="display:flex;gap:16px;align-items:center;flex:1;">
+                <i class="ti ti-user-search row-icon" style="font-size:32px"></i>
+                <div class="row-body"><div class="row-label">Revisable</div></div>
+            </div>
+            <span class="status-tag silver" style="background:var(--color-bg-filled);">PENDING</span>
+        </div>` : ''}
+        <!-- Roles row -->
+        <div class="info-row">
+            <div style="display:flex;gap:16px;align-items:center;flex:1;">
+                <i class="ti ti-users-group row-icon" style="font-size:32px"></i>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    ${t.roles.map((r,i) => `<span class="badge ${t.roleColors[i]}">${r}</span>`).join('')}
+                </div>
+            </div>
+            <div class="stacked-avatars">
+                <div class="avatar-wrap" style="background:linear-gradient(135deg,#e0c3fc,#8ec5fc);"></div>
+                <div class="avatar-wrap" style="background:linear-gradient(135deg,#fbc2eb,#a6c1ee);"></div>
+                <div class="avatar-wrap" style="background:linear-gradient(135deg,#a1c4fd,#c2e9fb);"></div>
+                <div class="avatar-count">${t.assignees}</div>
+            </div>
+        </div>`;
+
+    // Steps
+    const stepsEl = document.getElementById('td-steps-list');
+    stepsEl.innerHTML = t.steps.map(s => `
+        <div style="display:flex;gap:16px;align-items:flex-start;padding:16px 0;">
+            <i class="ti ti-square-rounded-check" style="font-size:24px;color:var(--color-text-primary);flex-shrink:0"></i>
+            <span class="p1" style="padding-top:2px;">${s}</span>
+        </div>`).join('');
+
+    // Deliverables
+    const delsEl = document.getElementById('td-deliverables-list');
+    delsEl.innerHTML = t.deliverablesData.map(d => `
+        <div class="deliverable-item" onclick="openDeliverable('${d.id}')">
+            <i class="ti ${d.delivered ? 'ti-square-rounded-check' : 'ti-square-rounded'} del-check" style="font-size:24px;color:${d.delivered ? 'var(--color-success)' : 'var(--color-text-primary)'}"></i>
+            ${d.thumbnail ? `<img class="del-thumb" src="${d.thumbnail}" alt="">` : `<div class="del-thumb" style="background:var(--color-bg-filled);"></div>`}
+            <div class="del-info">
+                <div class="del-title">${d.title}</div>
+                <div class="del-sub">${d.description}</div>
+            </div>
+            <i class="ti ti-chevron-right del-arrow" style="font-size:20px"></i>
+        </div>`).join('');
+
+    navigateTo('screen-task-detail');
+}
+
+// ========================================================================
+// RENDER: DELIVERABLE
+// ========================================================================
+function openDeliverable(id) {
+    currentDeliverable = currentTask.deliverablesData.find(d => d.id === id);
+    if (!currentDeliverable) return;
+    const d = currentDeliverable;
+
+    document.getElementById('del-title').textContent = d.title;
+    document.getElementById('del-desc').textContent = d.description;
+
+    const img = document.getElementById('del-image');
+    const noImg = document.getElementById('del-no-image');
+    const footer = document.getElementById('del-footer');
+    const deliveredActions = document.getElementById('del-delivered-actions');
+
+    if (d.delivered && d.deliveredImage) {
+        img.src = d.deliveredImage;
+        img.style.display = 'block';
+        noImg.style.display = 'none';
+        footer.style.display = 'none';
+        deliveredActions.style.display = 'flex';
+        document.getElementById('del-entrega-thumb').src = d.deliveredImage;
+        const delivDate = d.deliveredDate || new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: '2-digit' }).toUpperCase();
+        document.getElementById('del-entrega-meta').textContent = (d.deliveredBy || 'Usuario') + ' · ' + delivDate;
+    } else {
+        if (d.thumbnail) {
+            img.src = d.thumbnail;
+            img.style.display = 'block';
+            noImg.style.display = 'none';
+        } else {
+            img.style.display = 'none';
+            noImg.style.display = 'flex';
+        }
+        footer.style.display = 'block';
+        deliveredActions.style.display = 'none';
+    }
+
+    const guidelinesEl = document.getElementById('del-guidelines');
+    guidelinesEl.innerHTML = d.guidelines.map(g => `<li>${g}</li>`).join('');
+
+    navigateTo('screen-deliverable');
+}
+
+// ========================================================================
+// AI ANALYSIS MODAL
+// ========================================================================
+function openAIAnalysisModal() {
+    resetAIModal();
+    document.getElementById('modal-ai-analysis').classList.add('active');
+
+    // Step 1 (500ms): Wrapper expands + icon pops simultaneously
+    setTimeout(() => {
+        document.getElementById('ai-welcome-wrapper').classList.add('open');
+        document.getElementById('ai-welcome-icon').classList.add('pop-in');
+    }, 500);
+
+    // Step 2 (850ms): Typing dots slide in from the left
+    setTimeout(() => {
+        document.getElementById('ai-welcome-content').classList.add('slide-in');
+    }, 850);
+
+    // Step 3 (1100ms): Icon starts breathing
+    setTimeout(() => {
+        document.getElementById('ai-welcome-icon').classList.add('breathing');
+    }, 1100);
+
+    // Step 4 (2200ms): Hide typing, expand wrapper for text, typewrite the message
+    setTimeout(() => {
+        document.getElementById('ai-welcome-typing').style.display = 'none';
+        const wrapper = document.getElementById('ai-welcome-wrapper');
+        wrapper.classList.add('open-full');
+        const el = document.getElementById('ai-welcome-text');
+        el.textContent = '';
+        el.classList.add('expand');
+        typewrite(el, 'Sube la foto y te ayudo a revisarlo antes de confirmarlo!', 25);
+    }, 2200);
+}
+
+function typewrite(el, text, speed) {
+    let i = 0;
+    function tick() {
+        if (i < text.length) {
+            el.textContent += text[i];
+            i++;
+            setTimeout(tick, speed);
         }
     }
-    loadClients();
+    tick();
+}
 
-    // Navigation
-    window.navigateTo = function(targetId, animation) {
-        var current = document.getElementById(currentScreen);
-        var target = document.getElementById(targetId);
-        if (!current || !target) return;
+function closeAIModal() {
+    document.getElementById('modal-ai-analysis').classList.remove('active');
+    selectedFile = null;
+}
 
-        screenHistory.push({ id: currentScreen, animation: animation });
+let kpiInterval = null;
 
-        target.classList.remove('hidden');
-        target.style.transition = 'none';
-        if (animation === 'slide-right') target.classList.add('slide-right-enter');
-        else if (animation === 'fade') target.classList.add('fade-enter');
-        else if (animation === 'slide-up') target.classList.add('slide-up-enter');
+function resetAIModal() {
+    document.getElementById('ai-state-upload').style.display = '';
+    document.getElementById('ai-file-input').value = '';
+    // Reset image stage
+    const stage = document.getElementById('ai-image-stage');
+    stage.classList.remove('fullscreen', 'result-size');
+    stage.style.cursor = '';
+    stage.onclick = () => document.getElementById('ai-file-input').click();
+    const stageImg = document.getElementById('ai-stage-img');
+    stageImg.classList.remove('visible', 'grayscale');
+    stageImg.src = '';
+    document.getElementById('ai-dropper-placeholder').style.display = '';
+    document.getElementById('ai-glow-overlay').classList.remove('visible');
+    // Reset actions to just CANCELAR
+    const actions = document.getElementById('ai-upload-actions');
+    actions.style.display = '';
+    actions.innerHTML = '<button class="btn-secondary" onclick="closeAIModal()">CANCELAR</button>';
+    // Reset results content
+    const resultsContent = document.getElementById('ai-results-content');
+    resultsContent.style.display = 'none';
+    resultsContent.style.opacity = '';
+    resultsContent.style.transition = '';
+    document.getElementById('ai-verdict-overlay').classList.remove('visible');
+    document.querySelectorAll('#ai-results-content .ai-reveal').forEach(el => el.classList.remove('visible'));
+    document.getElementById('ai-typing-dots').style.display = '';
+    document.getElementById('ai-message-text').style.display = 'none';
+    // Reset welcome bubble animation
+    const welcomeWrapper = document.getElementById('ai-welcome-wrapper');
+    welcomeWrapper.classList.remove('open', 'open-full', 'collapsed');
+    const icon = document.getElementById('ai-welcome-icon');
+    icon.classList.remove('pop-in', 'bounce', 'breathing');
+    document.getElementById('ai-welcome-content').classList.remove('slide-in');
+    document.getElementById('ai-welcome-typing').style.display = '';
+    document.getElementById('ai-welcome-text').classList.remove('expand');
+    // Reset results AI icon animations
+    const resultIcon = document.querySelector('#ai-reveal-tag .tag-ai');
+    if (resultIcon) resultIcon.classList.remove('bounce', 'breathing');
+    if (kpiInterval) { clearInterval(kpiInterval); kpiInterval = null; }
+    selectedFile = null;
+}
 
-        requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
-                target.style.transition = '';
-                current.style.transition = '';
-                target.classList.remove('slide-right-enter', 'fade-enter', 'slide-up-enter');
-                target.classList.add('active');
+function handleAIFileSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        const imgSrc = ev.target.result;
+        const stage = document.getElementById('ai-image-stage');
+        const stageImg = document.getElementById('ai-stage-img');
+        stageImg.src = imgSrc;
+        stage.style.cursor = 'default';
+        stage.onclick = null; // Disable file picker
 
-                if (animation === 'slide-right') current.classList.add('slide-right-exit');
-                else if (animation === 'fade') current.style.opacity = '0';
-
-                setTimeout(function() {
-                    current.classList.remove('active', 'slide-right-exit');
-                    current.style.opacity = '';
-                    current.classList.add('hidden');
-                }, 350);
-
-                currentScreen = targetId;
-                var taskBottom = document.getElementById('task-bottom-bar');
-                if (taskBottom) taskBottom.style.display = (currentScreen === 'screen-task') ? '' : 'none';
-            });
+        // Hide placeholder, show image at dropper size (350px)
+        document.getElementById('ai-dropper-placeholder').style.display = 'none';
+        requestAnimationFrame(() => {
+            stageImg.classList.add('visible');
         });
+
+        // After 0.8s: collapse welcome/actions smoothly, expand to fullscreen
+        setTimeout(() => {
+            document.getElementById('ai-welcome-wrapper').classList.add('collapsed');
+            document.getElementById('ai-upload-actions').style.display = 'none';
+            stage.classList.add('fullscreen');
+        }, 800);
+
+        // After 1.8s: go grayscale
+        setTimeout(() => {
+            stageImg.classList.add('grayscale');
+        }, 1800);
+
+        // After 2.5s: show glow overlay + start KPI cycling
+        setTimeout(() => {
+            document.getElementById('ai-glow-overlay').classList.add('visible');
+            startKpiCycling();
+        }, 2500);
+
+        // Start the actual API call at 2s (while animation runs)
+        setTimeout(() => {
+            startAIAnalysis(imgSrc);
+        }, 2000);
     };
+    reader.readAsDataURL(file);
+}
 
-    window.navigateBack = function(targetId, animation) {
-        var entry = screenHistory.pop();
-        if (!entry) return;
+const KPI_MESSAGES = [
+    'Analizando planograma ...',
+    'Revisando visibilidad ...',
+    'Comprobando cartelería ...',
+    'Evaluando limpieza ...',
+    'Verificando iluminación ...'
+];
 
-        var current = document.getElementById(currentScreen);
-        var target = document.getElementById(entry.id);
-        if (!current || !target) return;
+function startKpiCycling() {
+    const label = document.getElementById('ai-kpi-label');
+    let idx = 0;
 
-        target.classList.remove('hidden');
-        target.style.transition = 'none';
+    function showNext() {
+        const msg = KPI_MESSAGES[idx % KPI_MESSAGES.length];
+        label.style.opacity = '0';
+        setTimeout(() => {
+            label.textContent = '';
+            label.style.opacity = '1';
+            typewrite(label, msg, 30);
+        }, 300);
+        idx++;
+    }
 
-        if (animation === 'slide-right') {
-            target.classList.add('slide-right-exit');
-            target.style.opacity = '0.5';
-            target.style.transform = 'translateX(-30%)';
-        } else if (animation === 'fade') {
-            target.style.opacity = '0';
+    showNext();
+    kpiInterval = setInterval(showNext, 2500);
+}
+
+async function startAIAnalysis(imgSrc) {
+    if (!selectedFile) return;
+
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+    formData.append('store_id', 'demo_store');
+    const clientId = 'cliente_c';
+    formData.append('client_id', clientId);
+
+    try {
+        const resp = await fetch('/analyze', { method: 'POST', body: formData });
+        if (!resp.ok) {
+            const errBody = await resp.text();
+            console.error('Analyze error:', resp.status, errBody);
+            throw new Error(resp.status + ': ' + errBody.substring(0, 200));
         }
+        const result = await resp.json();
+        console.log('Analyze result:', result);
+        showAIResults(result, imgSrc);
+    } catch (err) {
+        console.error('Analyze fetch error:', err);
+        showAIResults({
+            differences: [],
+            summary: 'No se pudo completar el análisis. ' + err.message,
+            _error: true
+        }, imgSrc);
+    }
+}
 
-        target.classList.add('active');
+function showAIResults(result, imgSrc) {
+    // Stop KPI cycling
+    if (kpiInterval) { clearInterval(kpiInterval); kpiInterval = null; }
+    const src = imgSrc || document.getElementById('ai-stage-img').src;
 
-        requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
-                target.style.transition = '';
-                current.style.transition = '';
-                target.style.opacity = '';
-                target.style.transform = '';
-                target.classList.remove('slide-right-exit');
+    // Prepare result data
+    const differences = result.differences || [];
+    const isError = result._error;
+    let verdict, verdictClass, message;
 
-                if (animation === 'slide-right') current.style.transform = 'translateX(100%)';
-                else if (animation === 'fade') current.style.opacity = '0';
+    if (isError) {
+        verdict = 'ERROR';
+        verdictClass = 'status-tag xl error';
+        message = 'No he podido completar el análisis. Inténtalo de nuevo.';
+    } else if (differences.length === 0) {
+        verdict = 'GENIAL';
+        verdictClass = 'status-tag xl success';
+        message = 'Todo se ve genial. La imagen cumple con los estándares, ¡buen trabajo!';
+    } else {
+        verdict = 'MEJORABLE';
+        verdictClass = 'status-tag xl warning';
+        message = 'He encontrado algunos puntos clave a mejorar. Si los ajustas, la tarea quedará perfecta.';
+    }
 
-                setTimeout(function() {
-                    current.classList.remove('active');
-                    current.classList.add('hidden');
-                    current.style.transform = '';
-                    current.style.opacity = '';
-                }, 350);
+    // Set verdict & message
+    document.getElementById('ai-verdict-tag').textContent = verdict;
+    document.getElementById('ai-verdict-tag').className = verdictClass;
+    document.getElementById('ai-message-text').textContent = message;
 
-                currentScreen = entry.id;
-                var taskBottom = document.getElementById('task-bottom-bar');
-                if (taskBottom) taskBottom.style.display = (currentScreen === 'screen-task') ? '' : 'none';
-            });
-        });
-    };
+    // Build feedback cards
+    const cardsEl = document.getElementById('ai-feedback-cards');
+    if (differences.length > 0) {
+        cardsEl.innerHTML = differences.map(d => `
+            <div class="ai-feedback-card">
+                <div class="card-content">
+                    <span class="kpi-tag">${(d.category || '').toUpperCase()}</span>
+                    <p class="kpi-text">${d.description}</p>
+                </div>
+                ${d.action ? `
+                <div class="recommendation">
+                    <div class="ai-line"></div>
+                    <div class="rec-body">
+                        <div class="rec-header">
+                            <span class="tag-ai sm">AI</span>
+                            TE RECOMIENDO
+                        </div>
+                        <p class="rec-text">${d.action}</p>
+                    </div>
+                </div>` : ''}
+            </div>`).join('');
+    } else if (!isError) {
+        cardsEl.innerHTML = '<p class="p1" style="color:var(--color-success);font-weight:700;">Todos los KPIs cumplen con los estándares.</p>';
+    } else {
+        cardsEl.innerHTML = '';
+    }
 
-    // Deliverable
-    window.openDeliverable = function(index) {
-        currentDeliverableIndex = index;
-        var titles = ['Foto del escaparate', 'Foto del escaparate', 'Foto de punto de venta'];
-        document.getElementById('deliv-detail-title').textContent = titles[index] || 'Foto del escaparate';
+    // === SMOOTH IN-PLACE TRANSITION ===
+    const stage = document.getElementById('ai-image-stage');
 
-        var delivered = deliveredImages[index];
-        var deliverySection = document.getElementById('delivery-section');
-        var actionArea = document.getElementById('deliv-action-area');
-        var undoArea = document.getElementById('deliv-undo-area');
-        var refImage = document.getElementById('deliv-ref-image');
+    // Step 0: Fade out glow overlay
+    document.getElementById('ai-glow-overlay').classList.remove('visible');
 
-        if (delivered && delivered.confirmed) {
-            deliverySection.style.display = 'block';
-            document.getElementById('delivery-thumb').src = delivered.url;
-            actionArea.style.display = 'none';
-            undoArea.style.display = 'block';
+    // Scroll to top smoothly before shrinking
+    const modalBody = document.querySelector('#ai-state-upload .ai-modal-body');
+    modalBody.scrollTo({ top: 0, behavior: 'smooth' });
 
-            if (refImage.tagName === 'DIV') {
-                var img = document.createElement('img');
-                img.className = 'deliv-ref-placeholder';
-                img.style.cssText = 'width:100%;border-radius:16px;aspect-ratio:4/3;object-fit:cover;margin-bottom:20px;';
-                img.src = delivered.url;
-                refImage.parentNode.replaceChild(img, refImage);
-                img.id = 'deliv-ref-image';
-            } else {
-                refImage.src = delivered.url;
-                refImage.style.objectFit = 'cover';
-            }
-        } else {
-            deliverySection.style.display = 'none';
-            actionArea.style.display = 'block';
-            undoArea.style.display = 'none';
+    // Prepare results content (invisible but in layout) so shrink doesn't jump
+    const resultsContent = document.getElementById('ai-results-content');
+    resultsContent.style.display = 'flex';
+    resultsContent.style.opacity = '0';
+    resultsContent.style.transition = 'opacity 0.5s ease';
 
-            var el = document.getElementById('deliv-ref-image');
-            if (el && el.tagName === 'IMG') {
-                var div = document.createElement('div');
-                div.className = 'deliv-ref-placeholder';
-                div.id = 'deliv-ref-image';
-                div.innerHTML = '<img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 160\'%3E%3Crect fill=\'%2380DEEA\' width=\'200\' height=\'160\' rx=\'8\'/%3E%3Ctext x=\'100\' y=\'88\' text-anchor=\'middle\' fill=\'%23fff\' font-size=\'40\'%3E🏪%3C/text%3E%3C/svg%3E" alt="" />';
-                el.parentNode.replaceChild(div, el);
-            }
+    // Prepare actions with result buttons (collapsed, will uncollapse later)
+    const actions = document.getElementById('ai-upload-actions');
+    actions.innerHTML = '<button class="btn-primary" onclick="confirmAIImage()">CONFIRMAR IMAGEN</button><button class="btn-secondary" onclick="closeAIModal()">CANCELAR</button>';
+
+    // Step 1 (0.5s): Shrink image from fullscreen to result-size
+    setTimeout(() => {
+        stage.classList.remove('fullscreen');
+        stage.classList.add('result-size');
+    }, 500);
+
+    // Step 2 (1.5s): Show verdict badge + fade in results content
+    setTimeout(() => {
+        document.getElementById('ai-verdict-overlay').classList.add('visible');
+        resultsContent.style.opacity = '1';
+    }, 1500);
+
+    // Step 4 (2s): AI tag bounces in + typing dots
+    setTimeout(() => {
+        document.getElementById('ai-reveal-tag').classList.add('visible');
+        const resultIcon = document.querySelector('#ai-reveal-tag .tag-ai');
+        if (resultIcon) {
+            resultIcon.classList.add('bounce');
+            setTimeout(() => {
+                resultIcon.classList.remove('bounce');
+                resultIcon.classList.add('breathing');
+            }, 600);
         }
+    }, 2000);
 
-        navigateTo('screen-deliverable', 'slide-right');
-    };
+    // Step 5 (3.2s): Replace typing with typewritten message
+    setTimeout(() => {
+        document.getElementById('ai-typing-dots').style.display = 'none';
+        const msgEl = document.getElementById('ai-message-text');
+        const fullMsg = msgEl.textContent;
+        msgEl.textContent = '';
+        msgEl.style.display = '';
+        // Typewrite the message, then show feedback cards after it finishes
+        const typeSpeed = 20;
+        const typewriteDuration = fullMsg.length * typeSpeed;
+        typewrite(msgEl, fullMsg, typeSpeed);
 
-    // Upload modal
-    window.openUploadModal = function() {
-        document.getElementById('upload-zone-container').style.display = 'block';
-        document.getElementById('analysis-container').classList.remove('active');
-        document.getElementById('file-input').value = '';
-        selectedFile = null;
-        analysisResult = null;
+        // Step 6: Feedback cards + buttons slide in AFTER typewriter finishes + small pause
+        setTimeout(() => {
+            document.getElementById('ai-feedback-cards').classList.add('visible');
+            actions.style.display = 'flex';
+        }, typewriteDuration + 400);
+    }, 3200);
 
-        document.getElementById('modal-overlay').classList.add('active');
-        document.getElementById('modal-drawer').classList.add('active');
-    };
+}
 
-    window.closeUploadModal = function() {
-        document.getElementById('modal-overlay').classList.remove('active');
-        document.getElementById('modal-drawer').classList.remove('active');
-    };
+function confirmAIImage() {
+    if (currentDeliverable && selectedFile) {
+        currentDeliverable.delivered = true;
+        currentDeliverable.deliveredImage = document.getElementById('ai-stage-img').src;
+        currentDeliverable.deliveredBy = 'Roberto López';
+        currentDeliverable.deliveredDate = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: '2-digit' }).replace('.', '').toUpperCase();
+        // Update deliverable screen — keep original thumbnail as header image
+        document.getElementById('del-footer').style.display = 'none';
+        document.getElementById('del-delivered-actions').style.display = 'flex';
+        document.getElementById('del-entrega-thumb').src = currentDeliverable.deliveredImage;
+        document.getElementById('del-entrega-meta').textContent = currentDeliverable.deliveredBy + ' · ' + currentDeliverable.deliveredDate;
+    }
+    closeAIModal();
+}
 
-    // File selection and analysis
-    window.handleFileSelect = async function(event) {
-        var file = event.target.files[0];
-        if (!file) return;
-        selectedFile = file;
+// ========================================================================
+// REDO MODAL
+// ========================================================================
+let holdTimer = null;
+let holdProgress = 0;
 
-        document.getElementById('upload-zone-container').style.display = 'none';
-        var container = document.getElementById('analysis-container');
-        container.classList.add('active');
+function openRedoModal() {
+    document.getElementById('modal-redo').classList.add('active');
+    setupHoldButton();
+}
 
-        var imgUrl = URL.createObjectURL(file);
-        var img = document.getElementById('analysis-image');
-        img.src = imgUrl;
+function closeRedoModal() {
+    document.getElementById('modal-redo').classList.remove('active');
+    clearHoldButton();
+}
 
-        // Reset
-        img.classList.remove('grayscale');
-        document.getElementById('analysis-overlay').classList.remove('active');
-        document.getElementById('analysis-text').classList.remove('active');
-        document.getElementById('analysis-badge').classList.remove('active', 'good', 'improve');
-        document.getElementById('analysis-badge').textContent = '';
-        document.getElementById('ai-verdict').classList.remove('active');
-        document.getElementById('ai-verdict-text').innerHTML = '';
-        document.getElementById('feedback-section').innerHTML = '';
-        document.getElementById('post-analysis-actions').style.display = 'none';
-        document.getElementById('analysis-glow').style.display = '';
+function setupHoldButton() {
+    const btn = document.getElementById('redo-hold-btn');
+    const bar = document.getElementById('redo-hold-bar');
 
-        // Animation
-        await delay(300);
-        img.classList.add('grayscale');
-
-        await delay(600);
-        document.getElementById('analysis-overlay').classList.add('active');
-
-        await delay(400);
-        document.getElementById('analysis-text').classList.add('active');
-
-        // API call
-        try {
-            var formData = new FormData();
-            formData.append('image', file);
-            formData.append('store_id', 'demo_store');
-            formData.append('client_id', clientId);
-
-            var resp = await fetch(window.location.origin + '/analyze', {
-                method: 'POST',
-                body: formData
-            });
-            analysisResult = await resp.json();
-        } catch(e) {
-            console.error('Analysis failed:', e);
-            analysisResult = { differences: [], summary: 'Analysis completed.' };
-        }
-
-        // Show result
-        await delay(500);
-        img.classList.remove('grayscale');
-        document.getElementById('analysis-text').classList.remove('active');
-
-        var badge = document.getElementById('analysis-badge');
-        var hasIssues = analysisResult.differences && analysisResult.differences.length > 0;
-
-        if (hasIssues) {
-            badge.textContent = 'MEJORABLE';
-            badge.classList.add('improve');
-        } else {
-            badge.textContent = 'GENIAL';
-            badge.classList.add('good');
-        }
-        badge.classList.add('active');
-
-        await delay(800);
-        document.getElementById('analysis-glow').style.display = 'none';
-        document.getElementById('analysis-overlay').classList.remove('active');
-
-        // AI verdict
-        await delay(400);
-        var verdictEl = document.getElementById('ai-verdict');
-        var verdictTextEl = document.getElementById('ai-verdict-text');
-        verdictEl.classList.add('active');
-
-        var verdictMessage = hasIssues
-            ? 'He encontrado algunos puntos clave a mejorar. Si los ajustas, la tarea quedará perfecta.'
-            : '¡Buen trabajo! La foto parece cumplir con lo esperado. Puedes entregarla cuando quieras.';
-
-        await typeText(verdictTextEl, verdictMessage);
-
-        // Feedback cards
-        if (hasIssues) {
-            await delay(300);
-            var feedbackHtml = '';
-            analysisResult.differences.forEach(function(diff) {
-                feedbackHtml += '<div class="feedback-card">' +
-                    '<div class="feedback-card-body">' +
-                    '<div class="feedback-category">' + escapeHtml(diff.category).toUpperCase() + '</div>' +
-                    '<div class="feedback-desc">' + escapeHtml(diff.description) + '</div>' +
-                    '</div>' +
-                    '<div class="feedback-recommend">' +
-                    '<div class="feedback-recommend-header">' +
-                    '<div class="ai-icon" style="width:22px;height:22px;font-size:8px;">AI</div>' +
-                    '<span class="feedback-recommend-label">TE RECOMIENDO</span>' +
-                    '</div>' +
-                    '<div class="feedback-recommend-text">' + escapeHtml(diff.action) + '</div>' +
-                    '</div>' +
-                    '</div>';
-            });
-            document.getElementById('feedback-section').innerHTML = feedbackHtml;
-        }
-
-        await delay(200);
-        document.getElementById('post-analysis-actions').style.display = 'block';
-
-        document.getElementById('modal-drawer').scrollTo({
-            top: document.getElementById('modal-drawer').scrollHeight,
-            behavior: 'smooth'
-        });
-    };
-
-    // Confirm
-    window.confirmImage = function() {
-        if (!selectedFile) return;
-
-        var imgUrl = document.getElementById('analysis-image').src;
-        deliveredImages[currentDeliverableIndex] = { url: imgUrl, confirmed: true };
-
-        var icon = document.getElementById('deliv-icon-' + currentDeliverableIndex);
-        if (icon) {
-            icon.classList.add('done');
-            icon.textContent = '✓';
-            icon.style.color = '#29B6F6';
-            icon.style.fontSize = '20px';
-            icon.style.fontWeight = '700';
-        }
-        var sub = document.getElementById('deliv-sub-' + currentDeliverableIndex);
-        if (sub) sub.textContent = 'Roberto López · Hoy 10:03';
-
-        var thumb = document.getElementById('deliv-thumb-' + currentDeliverableIndex);
-        if (thumb) { thumb.src = imgUrl; thumb.style.display = 'block'; }
-
-        closeUploadModal();
-
-        document.getElementById('delivery-section').style.display = 'block';
-        document.getElementById('delivery-thumb').src = imgUrl;
-        document.getElementById('deliv-action-area').style.display = 'none';
-        document.getElementById('deliv-undo-area').style.display = 'block';
-
-        var refImage = document.getElementById('deliv-ref-image');
-        if (refImage.tagName === 'DIV') {
-            var img = document.createElement('img');
-            img.id = 'deliv-ref-image';
-            img.style.cssText = 'width:100%;border-radius:16px;aspect-ratio:4/3;object-fit:cover;margin-bottom:20px;';
-            img.src = imgUrl;
-            refImage.parentNode.replaceChild(img, refImage);
-        } else {
-            refImage.src = imgUrl;
-        }
-    };
-
-    window.cancelAnalysis = function() { closeUploadModal(); };
-
-    // Undo
-    window.undoDelivery = function() {
-        delete deliveredImages[currentDeliverableIndex];
-
-        var icon = document.getElementById('deliv-icon-' + currentDeliverableIndex);
-        if (icon) {
-            icon.classList.remove('done');
-            icon.textContent = '📷';
-            icon.style.color = '';
-            icon.style.fontSize = '';
-            icon.style.fontWeight = '';
-        }
-        var sub = document.getElementById('deliv-sub-' + currentDeliverableIndex);
-        if (sub) sub.textContent = '';
-
-        var thumb = document.getElementById('deliv-thumb-' + currentDeliverableIndex);
-        if (thumb) thumb.style.display = 'none';
-
-        document.getElementById('delivery-section').style.display = 'none';
-        document.getElementById('deliv-action-area').style.display = 'block';
-        document.getElementById('deliv-undo-area').style.display = 'none';
-
-        var el = document.getElementById('deliv-ref-image');
-        if (el && el.tagName === 'IMG') {
-            var div = document.createElement('div');
-            div.className = 'deliv-ref-placeholder';
-            div.id = 'deliv-ref-image';
-            div.innerHTML = '<img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 160\'%3E%3Crect fill=\'%2380DEEA\' width=\'200\' height=\'160\' rx=\'8\'/%3E%3Ctext x=\'100\' y=\'88\' text-anchor=\'middle\' fill=\'%23fff\' font-size=\'40\'%3E🏪%3C/text%3E%3C/svg%3E" alt="" />';
-            el.parentNode.replaceChild(div, el);
-        }
-    };
-
-    // Helpers
-    function delay(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
-
-    function typeText(element, text) {
-        return new Promise(function(resolve) {
-            var i = 0;
-            element.innerHTML = '<span class="typing-cursor"></span>';
-            var interval = setInterval(function() {
-                if (i < text.length) {
-                    element.innerHTML = text.substring(0, i + 1) + '<span class="typing-cursor"></span>';
-                    i++;
-                } else {
-                    element.innerHTML = text;
-                    clearInterval(interval);
-                    resolve();
+    const startHold = (e) => {
+        e.preventDefault();
+        holdProgress = 0;
+        holdTimer = setInterval(() => {
+            holdProgress += 2;
+            bar.style.width = `${Math.min(holdProgress, 100)}%`;
+            if (holdProgress >= 100) {
+                clearInterval(holdTimer);
+                // Undo delivery
+                if (currentDeliverable) {
+                    currentDeliverable.delivered = false;
+                    currentDeliverable.deliveredImage = null;
+                    const img = document.getElementById('del-image');
+                    // Keep the thumbnail photo visible
+                    if (currentDeliverable.thumbnail) {
+                        img.src = currentDeliverable.thumbnail;
+                        img.style.display = 'block';
+                        document.getElementById('del-no-image').style.display = 'none';
+                    } else {
+                        img.style.display = 'none';
+                        document.getElementById('del-no-image').style.display = 'flex';
+                    }
+                    document.getElementById('del-footer').style.display = 'block';
+                    document.getElementById('del-delivered-actions').style.display = 'none';
                 }
-            }, 20);
+                closeRedoModal();
+            }
+        }, 30);
+    };
+
+    const endHold = () => {
+        clearInterval(holdTimer);
+        holdProgress = 0;
+        bar.style.width = '0';
+    };
+
+    btn.addEventListener('mousedown', startHold);
+    btn.addEventListener('touchstart', startHold, { passive: false });
+    btn.addEventListener('mouseup', endHold);
+    btn.addEventListener('mouseleave', endHold);
+    btn.addEventListener('touchend', endHold);
+    btn.addEventListener('touchcancel', endHold);
+}
+
+function clearHoldButton() {
+    clearInterval(holdTimer);
+    holdProgress = 0;
+    const bar = document.getElementById('redo-hold-bar');
+    if (bar) bar.style.width = '0';
+}
+
+// ========================================================================
+// COLLAPSIBLE
+// ========================================================================
+function toggleCollapsible(header) {
+    header.classList.toggle('collapsed');
+    const body = header.nextElementSibling;
+    body.classList.toggle('hidden');
+}
+
+// ========================================================================
+// SLIDER BUTTON
+// ========================================================================
+function setupSlider() {
+    const slider = document.getElementById('td-slider');
+    const thumb = document.getElementById('td-slider-thumb');
+    if (!slider || !thumb) return;
+
+    let dragging = false;
+    let startX = 0;
+    let currentX = 0;
+    const maxTravel = () => slider.offsetWidth - thumb.offsetWidth - 8;
+
+    const start = (e) => {
+        dragging = true;
+        startX = (e.touches ? e.touches[0].clientX : e.clientX) - currentX;
+        thumb.style.transition = 'none';
+    };
+
+    const move = (e) => {
+        if (!dragging) return;
+        e.preventDefault();
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - startX;
+        currentX = Math.max(0, Math.min(x, maxTravel()));
+        thumb.style.left = (4 + currentX) + 'px';
+    };
+
+    const end = () => {
+        if (!dragging) return;
+        dragging = false;
+        thumb.style.transition = 'left 0.3s';
+        if (currentX >= maxTravel() * 0.85) {
+            currentX = maxTravel();
+            thumb.style.left = (4 + currentX) + 'px';
+            slider.classList.add('unlocked');
+            // Task completed!
+        } else {
+            currentX = 0;
+            thumb.style.left = '4px';
+        }
+    };
+
+    thumb.addEventListener('mousedown', start);
+    thumb.addEventListener('touchstart', start, { passive: true });
+    window.addEventListener('mousemove', move);
+    window.addEventListener('touchmove', move, { passive: false });
+    window.addEventListener('mouseup', end);
+    window.addEventListener('touchend', end);
+}
+
+// ========================================================================
+// INIT
+// ========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    renderCampaigns();
+    setupSlider();
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove('active');
+            }
         });
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    var taskBottom = document.getElementById('task-bottom-bar');
-    if (taskBottom) taskBottom.style.display = 'none';
-})();
+    });
+});
 </script>
 </body>
 </html>

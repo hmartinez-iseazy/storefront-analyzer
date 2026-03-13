@@ -1,5 +1,6 @@
 import anthropic
 import base64
+import io
 import json
 import logging
 import os
@@ -7,9 +8,17 @@ from pathlib import Path
 from typing import Optional
 
 import fitz  # PyMuPDF
+from PIL import Image
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging — write to file so we can check errors from mobile
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("analyzer.log", encoding="utf-8"),
+    ]
+)
 logger = logging.getLogger(__name__)
 
 GUIDELINES_DIR = os.getenv("GUIDELINES_DIR", "./reference_guidelines")
@@ -113,12 +122,53 @@ def get_image_media_type(file_path: str) -> str:
     return media_types.get(ext, "image/jpeg")
 
 
+MAX_IMAGE_DIMENSION = 1568  # Claude Vision optimal max
+
+
+def resize_image_if_needed(file_path: str) -> bytes:
+    """Resize image if larger than MAX_IMAGE_DIMENSION, return bytes."""
+    with Image.open(file_path) as img:
+        # Fix orientation from EXIF data (mobile photos)
+        try:
+            from PIL import ExifTags
+            for orientation_key in ExifTags.TAGS.keys():
+                if ExifTags.TAGS[orientation_key] == 'Orientation':
+                    break
+            exif = img._getexif()
+            if exif and orientation_key in exif:
+                orientation = exif[orientation_key]
+                if orientation == 3:
+                    img = img.rotate(180, expand=True)
+                elif orientation == 6:
+                    img = img.rotate(270, expand=True)
+                elif orientation == 8:
+                    img = img.rotate(90, expand=True)
+        except Exception:
+            pass
+
+        w, h = img.size
+        logger.info(f"Original image size: {w}x{h} ({os.path.getsize(file_path) / 1024:.0f}KB)")
+
+        if max(w, h) > MAX_IMAGE_DIMENSION:
+            ratio = MAX_IMAGE_DIMENSION / max(w, h)
+            new_w, new_h = int(w * ratio), int(h * ratio)
+            img = img.resize((new_w, new_h), Image.LANCZOS)
+            logger.info(f"Resized to: {new_w}x{new_h}")
+
+        # Convert to JPEG for consistent, smaller size
+        if img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
+        buf = io.BytesIO()
+        img.save(buf, format='JPEG', quality=85)
+        logger.info(f"Output JPEG size: {buf.tell() / 1024:.0f}KB")
+        return buf.getvalue()
+
+
 def load_image_as_base64(file_path: str) -> tuple[str, str]:
-    """Load an image file and return its base64 encoding and media type."""
-    media_type = get_image_media_type(file_path)
-    with open(file_path, "rb") as f:
-        data = base64.standard_b64encode(f.read()).decode("utf-8")
-    return data, media_type
+    """Load an image file, resize if needed, and return its base64 encoding and media type."""
+    image_bytes = resize_image_if_needed(file_path)
+    data = base64.standard_b64encode(image_bytes).decode("utf-8")
+    return data, "image/jpeg"
 
 
 def extract_images_from_pdf(pdf_path: str) -> list[tuple[str, str]]:

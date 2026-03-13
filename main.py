@@ -1,4 +1,6 @@
+import logging
 import os
+import traceback
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -93,6 +95,17 @@ async def root():
     }
 
 
+@app.get("/debug/logs")
+async def debug_logs(lines: int = 50):
+    """Show last N lines of analyzer.log for debugging mobile errors."""
+    log_path = Path("analyzer.log")
+    if not log_path.exists():
+        return {"logs": "No log file yet"}
+    with open(log_path, "r", encoding="utf-8") as f:
+        all_lines = f.readlines()
+    return {"logs": "".join(all_lines[-lines:])}
+
+
 @app.get("/clients")
 async def list_clients():
     """
@@ -173,6 +186,7 @@ async def analyze_endpoint(
         )
     except Exception as e:
         # Clean up file on error
+        logging.error(f"Analysis failed for {store_id}/{client_id}: {e}\n{traceback.format_exc()}")
         file_path.unlink(missing_ok=True)
         raise HTTPException(
             status_code=500,
